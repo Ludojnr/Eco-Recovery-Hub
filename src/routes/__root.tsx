@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Navbar } from "@/components/layout";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -77,19 +79,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "EcoRecovery — Smart E-Waste Management" },
+      { name: "description", content: "A smart electronic waste management and circular economy platform. Recycle, earn rewards, track impact." },
+      { name: "theme-color", content: "#39FF14" },
+      { property: "og:title", content: "EcoRecovery — Smart E-Waste Management" },
+      { property: "og:description", content: "Recycle e-waste, earn eco points, track your environmental impact." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" },
+    ],
+    scripts: [
       {
-        rel: "stylesheet",
-        href: appCss,
+        children: `try{var t=localStorage.getItem('eco-recovery-theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}`,
       },
     ],
   }),
@@ -115,11 +121,21 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <Navbar />
       <Outlet />
+      <Toaster />
+      <footer className="border-t border-border mt-16">
+        <div className="mx-auto max-w-7xl px-4 lg:px-6 py-8 text-sm text-muted-foreground flex flex-wrap gap-3 justify-between">
+          <div>© {new Date().getFullYear()} EcoRecovery. A circular economy platform.</div>
+          <div className="flex gap-4">
+            <Link to="/knowledge">Knowledge</Link>
+            <Link to="/security">Data Security</Link>
+            <Link to="/map">Find a Center</Link>
+          </div>
+        </div>
+      </footer>
     </QueryClientProvider>
   );
 }
