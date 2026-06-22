@@ -90,7 +90,7 @@ export function Navbar() {
                 className="relative grid h-9 w-9 place-items-center rounded-full hover:bg-muted"
                 aria-label="Notifications"
               >
-                <Bell className="h-4.5 w-4.5" />
+                <Bell className="h-[18px] w-[18px]" />
                 {unread > 0 && (
                   <span className="absolute top-1.5 right-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
                     {unread}
@@ -102,7 +102,7 @@ export function Navbar() {
                 className="grid h-9 w-9 place-items-center rounded-full hover:bg-muted"
                 aria-label="Messages"
               >
-                <MessageSquare className="h-4.5 w-4.5" />
+                <MessageSquare className="h-[18px] w-[18px]" />
               </Link>
             </>
           )}
@@ -111,7 +111,7 @@ export function Navbar() {
             aria-label="Toggle theme"
             className="grid h-9 w-9 place-items-center rounded-full hover:bg-muted"
           >
-            {theme === "light" ? <Moon className="h-4.5 w-4.5" /> : <Sun className="h-4.5 w-4.5" />}
+            {theme === "light" ? <Moon className="h-[18px] w-[18px]" /> : <Sun className="h-[18px] w-[18px]" />}
           </button>
 
           {hydrated && user ? (
