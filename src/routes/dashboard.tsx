@@ -63,20 +63,19 @@ function Dashboard() {
       </div>
 
 
-      {/* Recycling history */}
+      {/* Recovery history */}
       <div className="mt-8">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-2xl font-bold">My Recycling History</h2>
+          <h2 className="font-display text-2xl font-bold">My Recovery History</h2>
           <Link to="/pickups" className="text-sm text-leaf hover:underline">View all →</Link>
         </div>
         <div className="mt-4 surface-card overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="p-3">Device</th>
+                <th className="p-3">Item</th>
                 <th className="p-3">Date</th>
                 <th className="p-3">Center</th>
-                <th className="p-3 text-right">Points</th>
                 <th className="p-3 text-right">Status</th>
               </tr>
             </thead>
@@ -86,7 +85,6 @@ function Dashboard() {
                   <td className="p-3 font-medium">{r.device}</td>
                   <td className="p-3 text-muted-foreground">{r.date}</td>
                   <td className="p-3 text-muted-foreground">{r.center}</td>
-                  <td className="p-3 text-right font-semibold">{r.points || "—"}</td>
                   <td className="p-3 text-right">
                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${r.status === "Completed" ? "bg-eco-soft text-leaf" : "bg-accent text-foreground"}`}>
                       {r.status}
@@ -98,6 +96,7 @@ function Dashboard() {
           </table>
         </div>
       </div>
+
     </PageContainer>
   );
 }
