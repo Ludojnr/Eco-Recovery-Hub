@@ -2,11 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageContainer, RequireUser } from "@/components/layout";
 import { useUser } from "@/lib/mock-store";
 import { dashboardStats, recyclingHistory } from "@/lib/mock-data";
-import { Award, Recycle, Truck, CheckCircle2, Leaf, TrendingUp } from "lucide-react";
+import { Recycle, Truck, CheckCircle2, Leaf, TrendingUp, Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "My Dashboard — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "My Dashboard — Eco Recovery Hub" }] }),
   component: () => (
     <RequireUser>
       <Dashboard />
@@ -17,8 +17,7 @@ export const Route = createFileRoute("/dashboard")({
 function Dashboard() {
   const user = useUser()!;
   const cards = [
-    { label: "My Recycling Points", value: dashboardStats.points.toLocaleString(), icon: Award, accent: "text-eco" },
-    { label: "Devices Recycled", value: dashboardStats.devicesRecycled, icon: Recycle, accent: "text-leaf" },
+    { label: "Items Recovered", value: dashboardStats.devicesRecycled, icon: Recycle, accent: "text-leaf" },
     { label: "Pending Pickups", value: dashboardStats.pendingPickups, icon: Truck, accent: "text-earth" },
     { label: "Completed Pickups", value: dashboardStats.completedPickups, icon: CheckCircle2, accent: "text-leaf" },
     { label: "CO₂ Saved", value: `${dashboardStats.co2Saved} kg`, icon: Leaf, accent: "text-eco" },
@@ -31,15 +30,16 @@ function Dashboard() {
         <div>
           <p className="text-sm text-muted-foreground">Welcome back,</p>
           <h1 className="font-display text-4xl font-bold">{user.fullName.split(" ")[0]} 👋</h1>
-          <p className="mt-1 text-muted-foreground">Here's your environmental impact at a glance.</p>
+          <p className="mt-1 text-muted-foreground">Your recovery activity and environmental impact at a glance.</p>
         </div>
         <div className="flex gap-2">
-          <Button asChild variant="outline"><Link to="/scanner">Scan device</Link></Button>
+          <Button asChild variant="outline"><Link to="/scanner"><Scan className="mr-2 h-4 w-4" />Scan material</Link></Button>
           <Button asChild className="bg-eco-gradient text-eco-foreground"><Link to="/pickups">Request pickup</Link></Button>
         </div>
       </div>
 
       <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
         {cards.map((c) => (
           <div key={c.label} className="surface-card p-5">
             <div className="flex items-center justify-between">
