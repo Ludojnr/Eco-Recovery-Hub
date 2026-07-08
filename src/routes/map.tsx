@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 export const Route = createFileRoute("/map")({
-  head: () => ({ meta: [{ title: "Recycling Map — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Recycling Map — Eco Recovery Hub" }] }),
   component: MapView,
 });
 

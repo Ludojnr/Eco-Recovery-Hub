@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({
-  head: () => ({ meta: [{ title: "Settings — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Settings — Eco Recovery Hub" }] }),
   component: () => <RequireUser><Settings /></RequireUser>,
 });
 

@@ -3,7 +3,7 @@ import { PageContainer } from "@/components/layout";
 import { ShieldCheck, Lock, FileCheck2, HardDrive } from "lucide-react";
 
 export const Route = createFileRoute("/security")({
-  head: () => ({ meta: [{ title: "Data Security — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Data Security — Eco Recovery Hub" }] }),
   component: Security,
 });
 

@@ -9,7 +9,7 @@ import { store } from "@/lib/mock-store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/login")({
-  head: () => ({ meta: [{ title: "Login — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Login — Eco Recovery Hub" }] }),
   component: Login,
 });
 
@@ -62,7 +62,7 @@ export function AuthLayout({ children, title, subtitle }: { children: React.Reac
       <div className="surface-card p-8">
         <div className="flex items-center gap-2">
           <div className="grid h-9 w-9 place-items-center rounded-xl bg-eco-gradient"><Recycle className="h-5 w-5 text-eco-foreground" /></div>
-          <span className="font-display font-bold">EcoRecovery</span>
+          <span className="font-display font-bold">Eco Recovery Hub</span>
         </div>
         <h1 className="mt-6 font-display text-2xl font-bold">{title}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>

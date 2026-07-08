@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { AuthLayout, Field } from "./auth.login";
 
 export const Route = createFileRoute("/auth/forgot")({
-  head: () => ({ meta: [{ title: "Reset Password — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Reset Password — Eco Recovery Hub" }] }),
   component: Forgot,
 });
 

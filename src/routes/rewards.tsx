@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Award, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/rewards")({
-  head: () => ({ meta: [{ title: "Rewards — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Rewards — Eco Recovery Hub" }] }),
   component: () => (
     <RequireUser>
       <Rewards />

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { AuthLayout, Field, SocialDivider } from "./auth.login";
 
 export const Route = createFileRoute("/auth/signup")({
-  head: () => ({ meta: [{ title: "Create Account — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Create Account — Eco Recovery Hub" }] }),
   component: SignUp,
 });
 
@@ -36,7 +36,7 @@ function SignUp() {
         institution: form.institution,
         password: form.password,
       });
-      toast.success("Account created — welcome to EcoRecovery!");
+      toast.success("Account created — welcome to Eco Recovery Hub!");
       navigate({ to: "/dashboard" });
     } catch (err: any) {
       toast.error(err.message);
