@@ -58,9 +58,10 @@ function Dashboard() {
             <div className="text-sm opacity-80">Environmental impact</div>
             <div className="font-display text-2xl font-bold">You've saved {dashboardStats.co2Saved} kg of CO₂ — equal to planting 4 trees 🌳</div>
           </div>
-          <Button asChild variant="secondary"><Link to="/rewards">View rewards</Link></Button>
+          <Button asChild variant="secondary"><Link to="/scanner">Recover more</Link></Button>
         </div>
       </div>
+
 
       {/* Recycling history */}
       <div className="mt-8">
