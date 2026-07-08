@@ -4,7 +4,7 @@ import { notifications } from "@/lib/mock-data";
 import { Bell } from "lucide-react";
 
 export const Route = createFileRoute("/notifications")({
-  head: () => ({ meta: [{ title: "Notifications — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Notifications — Eco Recovery Hub" }] }),
   component: () => <RequireUser><Notifs /></RequireUser>,
 });
 

@@ -4,7 +4,7 @@ import { articles } from "@/lib/mock-data";
 import { BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/knowledge")({
-  head: () => ({ meta: [{ title: "Knowledge Center — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Education — Eco Recovery Hub" }] }),
   component: Knowledge,
 });
 
@@ -14,10 +14,11 @@ function Knowledge() {
       <div className="flex items-center gap-3">
         <div className="grid h-11 w-11 place-items-center rounded-xl bg-eco-soft"><BookOpen className="h-5 w-5 text-leaf" /></div>
         <div>
-          <h1 className="font-display text-4xl font-bold">Knowledge Center</h1>
-          <p className="text-muted-foreground">Guides, deep dives, and best practices for responsible recycling.</p>
+          <h1 className="font-display text-4xl font-bold">Education</h1>
+          <p className="text-muted-foreground">Learn how to sort, prepare and recover materials across every sector.</p>
         </div>
       </div>
+
 
       <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {articles.map((a) => (

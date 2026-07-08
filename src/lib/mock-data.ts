@@ -65,11 +65,45 @@ export const articles = [
   { id: "4", title: "What Pickup Day Looks Like", category: "Guide", time: "3 min read", excerpt: "Prepare your devices, label cables, and meet your collector with confidence." },
 ];
 
-export const aiDetections = [
-  { device: "Smartphone — iPhone 12 (est.)", confidence: 0.94, category: "Mobile Device", points: 260, recommendation: "Trade-in: high recoverable value. Wipe data → drop-off at GreenHub Lagos.", co2: 8.4 },
-  { device: "Laptop — Dell XPS 13", confidence: 0.91, category: "Computing", points: 620, recommendation: "Refurbish-eligible. Schedule pickup for secure data destruction.", co2: 22.1 },
-  { device: "CRT Television", confidence: 0.97, category: "Display", points: 380, recommendation: "Hazardous (lead). Do not bin. Schedule pickup — handled at certified facility.", co2: 31.0 },
-  { device: "Lithium Battery Pack", confidence: 0.88, category: "Battery", points: 90, recommendation: "Fire risk. Tape terminals, drop at battery-only bin.", co2: 2.2 },
+export type SectorId = "e-waste" | "plastic" | "metal" | "glass" | "paper-cardboard" | "textile";
+
+export const sectors: {
+  id: SectorId;
+  name: string;
+  icon: string;
+  short: string;
+  examples: string;
+}[] = [
+  { id: "e-waste", name: "E-Waste / Electronics", icon: "🔌", short: "Recover value from old electronics and safely handle hazardous components.", examples: "Circuit boards, motherboards, phones, chargers, laptops, cables, small appliances." },
+  { id: "plastic", name: "Plastic", icon: "🧴", short: "Sort household and packaging plastics by polymer type for clean recycling.", examples: "PET bottles, HDPE containers, plastic packaging, household plastics." },
+  { id: "metal", name: "Metal", icon: "🥫", short: "Aluminum, steel and scrap metals recovered for smelting and reuse.", examples: "Cans, scrap metal, metal parts, household metal waste, device housings." },
+  { id: "glass", name: "Glass", icon: "🍾", short: "Clean glass streams turned into new bottles and containers.", examples: "Bottles, jars, glass containers, reusable and recyclable glass materials." },
+  { id: "paper-cardboard", name: "Paper & Cardboard", icon: "📦", short: "Fibre-based packaging recovered into new paper products.", examples: "Cartons, paper packaging, cardboard boxes, office paper." },
+  { id: "textile", name: "Clothing / Leather / Fabrics", icon: "👕", short: "Textiles and leather diverted from landfill for reuse and fibre recovery.", examples: "Old clothes, shoes, leather items, worn textiles, household fabric materials." },
+];
+
+export const aiDetections: {
+  item: string;
+  sector: SectorId;
+  category: string;
+  confidence: number;
+  points: number;
+  co2: number;
+  description: string;
+  handling: string;
+}[] = [
+  { item: "Smartphone — iPhone 12 (est.)", sector: "e-waste", category: "Mobile Device", confidence: 0.94, points: 260, co2: 8.4, description: "A modern smartphone with lithium battery and recoverable rare-earth components.", handling: "Wipe data → drop-off at a certified e-waste center. Do not bin — battery hazard." },
+  { item: "Laptop motherboard", sector: "e-waste", category: "Circuit Board", confidence: 0.92, points: 340, co2: 12.1, description: "Printed circuit board rich in copper, gold traces and solder alloys.", handling: "Send to a certified urban-mining facility for metal recovery." },
+  { item: "PET water bottle", sector: "plastic", category: "PET #1", confidence: 0.96, points: 15, co2: 0.3, description: "Transparent food-grade polymer, one of the most widely recycled plastics.", handling: "Rinse, remove cap and label if required, place in plastics bin." },
+  { item: "HDPE detergent container", sector: "plastic", category: "HDPE #2", confidence: 0.9, points: 22, co2: 0.5, description: "Rigid opaque plastic used for household product bottles.", handling: "Rinse thoroughly and drop in plastic recycling stream." },
+  { item: "Aluminum beverage can", sector: "metal", category: "Aluminum", confidence: 0.97, points: 30, co2: 0.9, description: "Fully recyclable light metal — one of the highest-value curbside recyclables.", handling: "Empty, lightly rinse, and place in metal recycling." },
+  { item: "Steel food can", sector: "metal", category: "Steel", confidence: 0.93, points: 25, co2: 0.7, description: "Tin-plated steel packaging suitable for magnetic sorting and smelting.", handling: "Rinse and drop at metal recycling point." },
+  { item: "Glass bottle (clear)", sector: "glass", category: "Glass", confidence: 0.95, points: 20, co2: 0.6, description: "Endlessly recyclable soda-lime glass container.", handling: "Rinse, remove lid, sort by color at glass drop-off." },
+  { item: "Cardboard carton", sector: "paper-cardboard", category: "Corrugated", confidence: 0.94, points: 18, co2: 0.4, description: "Corrugated fibreboard packaging, easily pulped into new paper.", handling: "Flatten and keep dry. Remove tape and plastic labels if possible." },
+  { item: "Office paper stack", sector: "paper-cardboard", category: "Mixed Paper", confidence: 0.9, points: 12, co2: 0.2, description: "Printer / office paper suitable for standard paper recycling streams.", handling: "Remove staples and clips; place in paper bin." },
+  { item: "Cotton T-shirt (worn)", sector: "textile", category: "Textile", confidence: 0.88, points: 40, co2: 3.1, description: "Natural-fibre garment eligible for reuse, resale or fibre recovery.", handling: "Donate if wearable; otherwise textile recycling bin." },
+  { item: "Leather shoes", sector: "textile", category: "Leather", confidence: 0.85, points: 55, co2: 4.2, description: "Leather footwear that can be refurbished or processed for material reuse.", handling: "Pair and drop at a textile / shoe recovery point." },
+  { item: "CRT Television", sector: "e-waste", category: "Display", confidence: 0.97, points: 380, co2: 31.0, description: "Legacy display containing leaded glass — treated as hazardous.", handling: "Do not bin. Schedule pickup — handled at certified hazardous facility." },
 ];
 
 export const tradeInPrices: Record<string, { low: number; high: number }> = {

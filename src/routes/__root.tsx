@@ -79,14 +79,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "EcoRecovery — Smart E-Waste Management" },
-      { name: "description", content: "A smart electronic waste management and circular economy platform. Recycle, earn rewards, track impact." },
-      { name: "theme-color", content: "#39FF14" },
-      { property: "og:title", content: "EcoRecovery — Smart E-Waste Management" },
-      { property: "og:description", content: "Recycle e-waste, earn eco points, track your environmental impact." },
+      { title: "Eco Recovery Hub — Multi-Sector Recycling & Recovery" },
+      { name: "description", content: "A smart multi-sector recovery platform. Upload, scan and classify materials across e-waste, plastic, metal, glass, paper & textiles." },
+      { name: "theme-color", content: "#3f8f5f" },
+      { property: "og:title", content: "Eco Recovery Hub — Multi-Sector Recycling & Recovery" },
+      { property: "og:description", content: "Recover materials across six sectors with AI-assisted classification, pickup and impact tracking." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -128,14 +129,15 @@ function RootComponent() {
       <Toaster />
       <footer className="border-t border-border mt-16">
         <div className="mx-auto max-w-7xl px-4 lg:px-6 py-8 text-sm text-muted-foreground flex flex-wrap gap-3 justify-between">
-          <div>© {new Date().getFullYear()} EcoRecovery. A circular economy platform.</div>
+          <div>© {new Date().getFullYear()} Eco Recovery Hub. A multi-sector recovery platform.</div>
           <div className="flex gap-4">
-            <Link to="/knowledge">Knowledge</Link>
+            <Link to="/knowledge">Education</Link>
             <Link to="/security">Data Security</Link>
             <Link to="/map">Find a Center</Link>
           </div>
         </div>
       </footer>
+
     </QueryClientProvider>
   );
 }

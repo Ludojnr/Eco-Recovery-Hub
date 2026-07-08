@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Coins } from "lucide-react";
 
 export const Route = createFileRoute("/trade-in")({
-  head: () => ({ meta: [{ title: "Trade-In Estimator — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Trade-In Estimator — Eco Recovery Hub" }] }),
   component: TradeIn,
 });
 

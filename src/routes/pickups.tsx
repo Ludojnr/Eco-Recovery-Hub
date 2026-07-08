@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Plus, Truck } from "lucide-react";
 
 export const Route = createFileRoute("/pickups")({
-  head: () => ({ meta: [{ title: "Pickup Requests — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Pickup Requests — Eco Recovery Hub" }] }),
   component: () => (
     <RequireUser>
       <Pickups />

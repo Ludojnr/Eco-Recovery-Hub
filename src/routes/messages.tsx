@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 
 export const Route = createFileRoute("/messages")({
-  head: () => ({ meta: [{ title: "Messages — EcoRecovery" }] }),
+  head: () => ({ meta: [{ title: "Messages — Eco Recovery Hub" }] }),
   component: () => <RequireUser><Msgs /></RequireUser>,
 });
 

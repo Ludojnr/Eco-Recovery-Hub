@@ -5,7 +5,7 @@ import {
   MessageSquare,
   Sun,
   Moon,
-  Recycle,
+  Leaf,
   Menu,
   X,
   LayoutDashboard,
@@ -14,6 +14,9 @@ import {
   LogOut,
   Settings as SettingsIcon,
   User as UserIcon,
+  BookOpen,
+  ShieldCheck,
+  BadgeCheck,
 } from "lucide-react";
 import { useHydrated, useUser, store } from "@/lib/mock-store";
 import { useTheme } from "@/lib/theme";
@@ -26,19 +29,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { notifications } from "@/lib/mock-data";
+import { notifications, dashboardStats } from "@/lib/mock-data";
 
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/scanner", label: "AI Scanner" },
   { to: "/map", label: "Recycling Map" },
   { to: "/pickups", label: "Pickup Requests" },
-  { to: "/rewards", label: "Rewards" },
   { to: "/dashboard", label: "Dashboard" },
-  { to: "/knowledge", label: "Knowledge Center" },
+  { to: "/knowledge", label: "Education" },
   { to: "/trade-in", label: "Trade-In Estimator" },
   { to: "/security", label: "Data Security" },
 ] as const;
+
+export function BrandMark({ className = "" }: { className?: string }) {
+  return (
+    <span className={`flex items-center gap-2 ${className}`}>
+      <span className="grid h-9 w-9 place-items-center rounded-xl bg-eco-gradient glow-eco">
+        <Leaf className="h-5 w-5 text-eco-foreground" strokeWidth={2.2} />
+      </span>
+      <span className="font-display text-lg font-bold tracking-tight">
+        Eco <span className="text-gradient-eco">Recovery Hub</span>
+      </span>
+    </span>
+  );
+}
 
 export function Navbar() {
   const hydrated = useHydrated();
@@ -51,14 +66,8 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 lg:px-6">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-eco-gradient glow-eco">
-            <Recycle className="h-5 w-5 text-eco-foreground" strokeWidth={2.5} />
-          </div>
-          <span className="font-display text-lg font-bold tracking-tight">
-            Eco<span className="text-gradient-eco">Recovery</span>
-          </span>
+        <Link to="/" className="shrink-0">
+          <BrandMark />
         </Link>
 
         {/* Center nav */}
@@ -83,29 +92,6 @@ export function Navbar() {
 
         {/* Right */}
         <div className="ml-auto flex items-center gap-1">
-          {hydrated && user && (
-            <>
-              <Link
-                to="/notifications"
-                className="relative grid h-9 w-9 place-items-center rounded-full hover:bg-muted"
-                aria-label="Notifications"
-              >
-                <Bell className="h-[18px] w-[18px]" />
-                {unread > 0 && (
-                  <span className="absolute top-1.5 right-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
-                    {unread}
-                  </span>
-                )}
-              </Link>
-              <Link
-                to="/messages"
-                className="grid h-9 w-9 place-items-center rounded-full hover:bg-muted"
-                aria-label="Messages"
-              >
-                <MessageSquare className="h-[18px] w-[18px]" />
-              </Link>
-            </>
-          )}
           <button
             onClick={toggle}
             aria-label="Toggle theme"
@@ -117,23 +103,53 @@ export function Navbar() {
           {hydrated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="ml-1 grid h-9 w-9 place-items-center rounded-full bg-eco-gradient text-sm font-bold text-eco-foreground">
-                  {user.fullName.charAt(0).toUpperCase()}
+                <button
+                  aria-label="Open account menu"
+                  className="ml-1 flex items-center gap-2 rounded-full border border-border pl-1 pr-2 py-1 hover:bg-muted"
+                >
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-eco-gradient text-xs font-bold text-eco-foreground">
+                    {user.fullName.charAt(0).toUpperCase()}
+                  </span>
+                  <Menu className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-64">
                 <DropdownMenuLabel>
-                  <div className="font-medium">{user.fullName}</div>
-                  <div className="text-xs font-normal text-muted-foreground">{user.email}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <div className="font-medium">{user.fullName}</div>
+                      <div className="text-xs font-normal text-muted-foreground">{user.email}</div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-eco-soft px-2 py-0.5 text-[10px] font-medium text-leaf">
+                      <BadgeCheck className="h-3 w-3" /> KYC Verified
+                    </span>
+                  </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" />My Dashboard</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/rewards"><Award className="mr-2 h-4 w-4" />My Rewards</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/pickups"><Truck className="mr-2 h-4 w-4" />My Requests</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/settings"><UserIcon className="mr-2 h-4 w-4" />Profile / Account</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/rewards">
+                    <Award className="mr-2 h-4 w-4" />Rewards
+                    <span className="ml-auto text-xs text-muted-foreground">{dashboardStats.points.toLocaleString()} pts</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/notifications">
+                    <Bell className="mr-2 h-4 w-4" />Notifications
+                    {unread > 0 && <span className="ml-auto rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">{unread}</span>}
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/messages"><MessageSquare className="mr-2 h-4 w-4" />Messages</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/notifications"><Bell className="mr-2 h-4 w-4" />Notifications</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/pickups"><Truck className="mr-2 h-4 w-4" />My Requests</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/knowledge"><BookOpen className="mr-2 h-4 w-4" />Education</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/security"><ShieldCheck className="mr-2 h-4 w-4" />Data Security</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/settings"><SettingsIcon className="mr-2 h-4 w-4" />Settings</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={toggle}>
+                  {theme === "light" ? <Moon className="mr-2 h-4 w-4" /> : <Sun className="mr-2 h-4 w-4" />}
+                  {theme === "light" ? "Dark mode" : "Light mode"}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => store.signOut()} className="text-destructive focus:text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />Logout
                 </DropdownMenuItem>
@@ -171,6 +187,17 @@ export function Navbar() {
                 {l.label}
               </Link>
             ))}
+            {hydrated && user && (
+              <>
+                <div className="mt-2 border-t border-border pt-2 text-xs uppercase text-muted-foreground px-3">Account</div>
+                <Link to="/settings" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Profile / Account</Link>
+                <Link to="/rewards" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Rewards</Link>
+                <Link to="/notifications" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Notifications</Link>
+                <Link to="/messages" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Messages</Link>
+                <Link to="/settings" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Settings</Link>
+                <button onClick={() => { store.signOut(); setOpen(false); }} className="rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-muted">Logout</button>
+              </>
+            )}
             {hydrated && !user && (
               <div className="flex gap-2 p-2 sm:hidden">
                 <Button asChild variant="outline" className="flex-1"><Link to="/auth/login" onClick={() => setOpen(false)}>Login</Link></Button>
