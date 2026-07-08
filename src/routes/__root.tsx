@@ -129,14 +129,15 @@ function RootComponent() {
       <Toaster />
       <footer className="border-t border-border mt-16">
         <div className="mx-auto max-w-7xl px-4 lg:px-6 py-8 text-sm text-muted-foreground flex flex-wrap gap-3 justify-between">
-          <div>© {new Date().getFullYear()} EcoRecovery. A circular economy platform.</div>
+          <div>© {new Date().getFullYear()} Eco Recovery Hub. A multi-sector recovery platform.</div>
           <div className="flex gap-4">
-            <Link to="/knowledge">Knowledge</Link>
+            <Link to="/knowledge">Education</Link>
             <Link to="/security">Data Security</Link>
             <Link to="/map">Find a Center</Link>
           </div>
         </div>
       </footer>
+
     </QueryClientProvider>
   );
 }
