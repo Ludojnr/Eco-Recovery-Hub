@@ -16,9 +16,9 @@ import { sectors } from "@/lib/mock-data";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Eco Recovery Hub — Multi-Sector Recycling & Recovery" },
+      { title: "Eco-Recovery Hub — Multi-Sector Recycling & Recovery" },
       { name: "description", content: "A smart multi-sector recovery platform. Upload materials, get AI classification across e-waste, plastic, metal, glass, paper & textiles, schedule pickup, and track your impact." },
-      { property: "og:title", content: "Eco Recovery Hub — Multi-Sector Recycling & Recovery" },
+      { property: "og:title", content: "Eco-Recovery Hub — Multi-Sector Recycling & Recovery" },
       { property: "og:description", content: "Identify, sort, upload and recover recyclable materials across six sectors with AI-assisted guidance." },
     ],
   }),
@@ -46,7 +46,7 @@ function Landing() {
                 <span className="text-gradient-eco">Every material has a second life.</span>
               </h1>
               <p className="mt-6 text-lg text-muted-foreground max-w-xl">
-                Eco Recovery Hub is a multi-sector sustainability platform. Upload or scan your materials, our AI
+                Eco-Recovery Hub is a multi-sector sustainability platform. Upload or scan your materials, our AI
                 identifies the sector, and we guide you through the right recycling path — from e-waste to textiles.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -106,20 +106,30 @@ function Landing() {
             </div>
             <h2 className="mt-4 font-display text-4xl font-bold">Sectors we recover</h2>
             <p className="mt-3 text-muted-foreground">
-              Eco Recovery Hub goes beyond electronics. Upload or scan your material and we&apos;ll classify it
+              Eco-Recovery Hub goes beyond electronics. Upload or scan your material and we&apos;ll classify it
               into the right recovery stream with sector-specific handling guidance.
             </p>
           </div>
           <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sectors.map((s) => (
-              <div key={s.id} className="surface-card p-6 hover:border-eco transition-colors">
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-eco-soft text-2xl">{s.icon}</div>
-                <h3 className="mt-4 font-display text-xl font-semibold">{s.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{s.short}</p>
-                <div className="mt-3 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground">Examples: </span>{s.examples}
+              <Link
+                key={s.id}
+                to="/sectors/$sectorId"
+                params={{ sectorId: s.id }}
+                className="surface-card p-6 hover:border-eco transition-colors text-left flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-eco-soft text-2xl group-hover:scale-105 transition-transform">{s.icon}</div>
+                  <h3 className="mt-4 font-display text-xl font-semibold group-hover:text-leaf transition-colors">{s.name}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{s.short}</p>
+                  <div className="mt-3 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">Examples: </span>{s.examples}
+                  </div>
                 </div>
-              </div>
+                <div className="mt-4 inline-flex items-center text-xs font-semibold text-leaf group-hover:underline">
+                  View sector details &rarr;
+                </div>
+              </Link>
             ))}
           </div>
           <div className="mt-10 text-center">
@@ -183,7 +193,7 @@ function Landing() {
             Ready to make every material part of the solution?
           </h2>
           <p className="mt-3 max-w-xl text-eco-foreground/80">
-            Join households, schools and businesses recovering across six recycling sectors with Eco Recovery Hub.
+            Join households, schools and businesses recovering across six recycling sectors with Eco-Recovery Hub.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" variant="secondary"><Link to="/auth/signup">Create Free Account</Link></Button>

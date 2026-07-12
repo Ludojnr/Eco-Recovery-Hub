@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { aiDetections, sectors, type SectorId } from "@/lib/mock-data";
 import { Upload, Sparkles, Camera, RotateCw, X, ImagePlus, ScanLine } from "lucide-react";
 import { toast } from "sonner";
+import { store } from "@/lib/mock-store";
 
 export const Route = createFileRoute("/scanner")({
-  head: () => ({ meta: [{ title: "AI Scanner — Eco Recovery Hub" }] }),
+  head: () => ({ meta: [{ title: "AI Scanner — Eco-Recovery Hub" }] }),
   component: Scanner,
 });
 
@@ -142,7 +143,26 @@ function Scanner() {
         {uploads.some((u) => u.result) && (
           <div className="mt-6 flex justify-end">
             <Button
-              onClick={() => toast.success(`${uploads.filter((u) => u.result).length} item(s) added to your recovery submissions`)}
+              onClick={() => {
+                const scannedResults = uploads.filter((u) => u.result);
+                scannedResults.forEach((u) => {
+                  if (u.result) {
+                    store.addScan({
+                      item: u.result.item,
+                      sector: u.result.sector,
+                      category: u.result.category,
+                      confidence: u.result.confidence,
+                      points: u.result.points,
+                      co2: u.result.co2,
+                      description: u.result.description,
+                      handling: u.result.handling,
+                      imageUrl: u.url,
+                    });
+                  }
+                });
+                toast.success(`${scannedResults.length} item(s) submitted for administrator approval!`);
+                setUploads([]);
+              }}
               className="bg-eco-gradient text-eco-foreground"
             >
               Submit for recovery

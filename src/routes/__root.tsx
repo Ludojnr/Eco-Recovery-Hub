@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -79,10 +80,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Eco Recovery Hub — Multi-Sector Recycling & Recovery" },
+      { title: "Eco-Recovery Hub — Multi-Sector Recycling & Recovery" },
       { name: "description", content: "A smart multi-sector recovery platform. Upload, scan and classify materials across e-waste, plastic, metal, glass, paper & textiles." },
       { name: "theme-color", content: "#3f8f5f" },
-      { property: "og:title", content: "Eco Recovery Hub — Multi-Sector Recycling & Recovery" },
+      { property: "og:title", content: "Eco-Recovery Hub — Multi-Sector Recycling & Recovery" },
       { property: "og:description", content: "Recover materials across six sectors with AI-assisted classification, pickup and impact tracking." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -122,22 +123,26 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin-dashboard');
+
   return (
     <QueryClientProvider client={queryClient}>
-      <Navbar />
+      {!isAdminPage && <Navbar />}
       <Outlet />
       <Toaster />
-      <footer className="border-t border-border mt-16">
-        <div className="mx-auto max-w-7xl px-4 lg:px-6 py-8 text-sm text-muted-foreground flex flex-wrap gap-3 justify-between">
-          <div>© {new Date().getFullYear()} Eco Recovery Hub. A multi-sector recovery platform.</div>
-          <div className="flex gap-4">
-            <Link to="/knowledge">Education</Link>
-            <Link to="/security">Data Security</Link>
-            <Link to="/map">Find a Center</Link>
+      {!isAdminPage && (
+        <footer className="border-t border-border mt-16">
+          <div className="mx-auto max-w-7xl px-4 lg:px-6 py-8 text-sm text-muted-foreground flex flex-wrap gap-3 justify-between">
+            <div>© {new Date().getFullYear()} Eco-Recovery Hub. A multi-sector recovery platform.</div>
+            <div className="flex gap-4">
+              <Link to="/knowledge">Education</Link>
+              <Link to="/security">Data Security</Link>
+              <Link to="/map">Find a Center</Link>
+            </div>
           </div>
-        </div>
-      </footer>
-
+        </footer>
+      )}
     </QueryClientProvider>
   );
 }

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Recycle } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,7 @@ import { store } from "@/lib/mock-store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/login")({
-  head: () => ({ meta: [{ title: "Login — Eco Recovery Hub" }] }),
+  head: () => ({ meta: [{ title: "Login — Eco-Recovery Hub" }] }),
   component: Login,
 });
 
@@ -24,7 +24,12 @@ function Login() {
     try {
       store.signIn(email, password);
       toast.success("Welcome back!");
-      navigate({ to: "/dashboard" });
+      const activeUser = store.getSnapshot().user;
+      if (activeUser && activeUser.role === "Admin") {
+        navigate({ to: "/admin-dashboard" });
+      } else {
+        navigate({ to: "/dashboard" });
+      }
     } catch (err: any) {
       toast.error(err.message);
     }
@@ -39,12 +44,24 @@ function Login() {
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={remember} onCheckedChange={(v) => setRemember(!!v)} /> Remember me
           </label>
-          <Link to="/auth/forgot" className="text-sm text-leaf hover:underline">Forgot password?</Link>
         </div>
         <Button type="submit" className="w-full bg-eco-gradient text-eco-foreground">Sign in</Button>
         <div className="text-center text-sm text-muted-foreground">
           No account? <Link to="/auth/signup" className="text-leaf font-medium hover:underline">Create one</Link>
         </div>
+        
+        <div className="text-xs border border-dashed border-border rounded-lg p-3 bg-muted/30 text-muted-foreground mt-4 space-y-1">
+          <div className="font-semibold text-foreground text-center">Exhibition Demo Credentials:</div>
+          <div className="flex justify-between">
+            <span>Admin:</span>
+            <span className="font-mono text-foreground font-semibold">admin@ecorecovery.org / admin123</span>
+          </div>
+          <div className="flex justify-between">
+            <span>User:</span>
+            <span className="font-mono text-foreground font-semibold">kwame@gmail.com / password123</span>
+          </div>
+        </div>
+
         <SocialDivider />
         <div className="grid grid-cols-2 gap-2">
           <Button type="button" variant="outline" disabled>Google</Button>
@@ -61,8 +78,8 @@ export function AuthLayout({ children, title, subtitle }: { children: React.Reac
     <div className="mx-auto max-w-md px-4 py-12 lg:py-16">
       <div className="surface-card p-8">
         <div className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-eco-gradient"><Recycle className="h-5 w-5 text-eco-foreground" /></div>
-          <span className="font-display font-bold">Eco Recovery Hub</span>
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-eco-gradient"><Leaf className="h-5 w-5 text-eco-foreground" /></div>
+          <span className="font-display font-bold">Eco-Recovery Hub</span>
         </div>
         <h1 className="mt-6 font-display text-2xl font-bold">{title}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>

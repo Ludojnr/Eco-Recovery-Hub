@@ -20,10 +20,11 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AdminDashboardRouteImport } from './routes/admin-dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SectorsSectorIdRouteImport } from './routes/sectors.$sectorId'
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
-import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
 
 const TradeInRoute = TradeInRouteImport.update({
   id: '/trade-in',
@@ -80,9 +81,19 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin-dashboard',
+  path: '/admin-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SectorsSectorIdRoute = SectorsSectorIdRouteImport.update({
+  id: '/sectors/$sectorId',
+  path: '/sectors/$sectorId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
@@ -95,14 +106,10 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthForgotRoute = AuthForgotRouteImport.update({
-  id: '/auth/forgot',
-  path: '/auth/forgot',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin-dashboard': typeof AdminDashboardRoute
   '/dashboard': typeof DashboardRoute
   '/knowledge': typeof KnowledgeRoute
   '/map': typeof MapRoute
@@ -114,12 +121,13 @@ export interface FileRoutesByFullPath {
   '/security': typeof SecurityRoute
   '/settings': typeof SettingsRoute
   '/trade-in': typeof TradeInRoute
-  '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/sectors/$sectorId': typeof SectorsSectorIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin-dashboard': typeof AdminDashboardRoute
   '/dashboard': typeof DashboardRoute
   '/knowledge': typeof KnowledgeRoute
   '/map': typeof MapRoute
@@ -131,13 +139,14 @@ export interface FileRoutesByTo {
   '/security': typeof SecurityRoute
   '/settings': typeof SettingsRoute
   '/trade-in': typeof TradeInRoute
-  '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/sectors/$sectorId': typeof SectorsSectorIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin-dashboard': typeof AdminDashboardRoute
   '/dashboard': typeof DashboardRoute
   '/knowledge': typeof KnowledgeRoute
   '/map': typeof MapRoute
@@ -149,14 +158,15 @@ export interface FileRoutesById {
   '/security': typeof SecurityRoute
   '/settings': typeof SettingsRoute
   '/trade-in': typeof TradeInRoute
-  '/auth/forgot': typeof AuthForgotRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/sectors/$sectorId': typeof SectorsSectorIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin-dashboard'
     | '/dashboard'
     | '/knowledge'
     | '/map'
@@ -168,12 +178,13 @@ export interface FileRouteTypes {
     | '/security'
     | '/settings'
     | '/trade-in'
-    | '/auth/forgot'
     | '/auth/login'
     | '/auth/signup'
+    | '/sectors/$sectorId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin-dashboard'
     | '/dashboard'
     | '/knowledge'
     | '/map'
@@ -185,12 +196,13 @@ export interface FileRouteTypes {
     | '/security'
     | '/settings'
     | '/trade-in'
-    | '/auth/forgot'
     | '/auth/login'
     | '/auth/signup'
+    | '/sectors/$sectorId'
   id:
     | '__root__'
     | '/'
+    | '/admin-dashboard'
     | '/dashboard'
     | '/knowledge'
     | '/map'
@@ -202,13 +214,14 @@ export interface FileRouteTypes {
     | '/security'
     | '/settings'
     | '/trade-in'
-    | '/auth/forgot'
     | '/auth/login'
     | '/auth/signup'
+    | '/sectors/$sectorId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
   DashboardRoute: typeof DashboardRoute
   KnowledgeRoute: typeof KnowledgeRoute
   MapRoute: typeof MapRoute
@@ -220,9 +233,9 @@ export interface RootRouteChildren {
   SecurityRoute: typeof SecurityRoute
   SettingsRoute: typeof SettingsRoute
   TradeInRoute: typeof TradeInRoute
-  AuthForgotRoute: typeof AuthForgotRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  SectorsSectorIdRoute: typeof SectorsSectorIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -304,11 +317,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-dashboard': {
+      id: '/admin-dashboard'
+      path: '/admin-dashboard'
+      fullPath: '/admin-dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sectors/$sectorId': {
+      id: '/sectors/$sectorId'
+      path: '/sectors/$sectorId'
+      fullPath: '/sectors/$sectorId'
+      preLoaderRoute: typeof SectorsSectorIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
@@ -325,18 +352,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/forgot': {
-      id: '/auth/forgot'
-      path: '/auth/forgot'
-      fullPath: '/auth/forgot'
-      preLoaderRoute: typeof AuthForgotRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
   DashboardRoute: DashboardRoute,
   KnowledgeRoute: KnowledgeRoute,
   MapRoute: MapRoute,
@@ -348,10 +369,20 @@ const rootRouteChildren: RootRouteChildren = {
   SecurityRoute: SecurityRoute,
   SettingsRoute: SettingsRoute,
   TradeInRoute: TradeInRoute,
-  AuthForgotRoute: AuthForgotRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
+  SectorsSectorIdRoute: SectorsSectorIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

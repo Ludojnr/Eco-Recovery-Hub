@@ -4,7 +4,7 @@ import { articles } from "@/lib/mock-data";
 import { BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/knowledge")({
-  head: () => ({ meta: [{ title: "Education — Eco Recovery Hub" }] }),
+  head: () => ({ meta: [{ title: "Education — Eco-Recovery Hub" }] }),
   component: Knowledge,
 });
 

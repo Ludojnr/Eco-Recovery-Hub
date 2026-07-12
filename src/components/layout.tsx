@@ -1,5 +1,5 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { useState, useSyncExternalStore } from "react";
 import {
   Bell,
   MessageSquare,
@@ -11,12 +11,13 @@ import {
   LayoutDashboard,
   Award,
   Truck,
+  Upload,
   LogOut,
   Settings as SettingsIcon,
-  User as UserIcon,
   BookOpen,
   ShieldCheck,
   BadgeCheck,
+  User as UserIcon,
 } from "lucide-react";
 import { useHydrated, useUser, store } from "@/lib/mock-store";
 import { useTheme } from "@/lib/theme";
@@ -49,19 +50,32 @@ export function BrandMark({ className = "" }: { className?: string }) {
         <Leaf className="h-5 w-5 text-eco-foreground" strokeWidth={2.2} />
       </span>
       <span className="font-display text-lg font-bold tracking-tight">
-        Eco <span className="text-gradient-eco">Recovery Hub</span>
+        Eco-Recovery <span className="text-gradient-eco">Hub</span>
       </span>
     </span>
   );
 }
 
 export function Navbar() {
+  const navigate = useNavigate();
   const hydrated = useHydrated();
-  const user = useUser();
   const { theme, toggle } = useTheme();
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const unread = notifications.filter((n) => n.unread).length;
+
+  const snap = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
+  const user = snap.user;
+  const userNotifications = user ? snap.notifications.filter((n) => n.userId === user.id) : [];
+  const unread = userNotifications.filter((n) => n.unread).length;
+  const kycStatus = user?.kycStatus ?? "Not Started";
+  const kycBadgeClass =
+    kycStatus === "Verified"
+      ? "bg-leaf/10 text-leaf"
+      : kycStatus === "Pending"
+      ? "bg-amber-100 text-amber-700"
+      : kycStatus === "Rejected"
+      ? "bg-destructive/10 text-destructive"
+      : "bg-muted text-muted-foreground";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
@@ -115,25 +129,27 @@ export function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
                 <DropdownMenuLabel>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <div className="font-medium">{user.fullName}</div>
-                      <div className="text-xs font-normal text-muted-foreground">{user.email}</div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <div className="font-medium">{user.fullName}</div>
+                        <div className="text-xs font-normal text-muted-foreground truncate">{user.email}</div>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${kycBadgeClass}`}>
+                        <BadgeCheck className="h-3 w-3" /> {kycStatus}
+                      </span>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-eco-soft px-2 py-0.5 text-[10px] font-medium text-leaf">
-                      <BadgeCheck className="h-3 w-3" /> KYC Verified
-                    </span>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Points</span>
+                      <span className="font-semibold text-foreground">{user.points.toLocaleString()} pts</span>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild><Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/settings"><UserIcon className="mr-2 h-4 w-4" />Profile / Account</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/rewards">
-                    <Award className="mr-2 h-4 w-4" />Rewards
-                    <span className="ml-auto text-xs text-muted-foreground">{dashboardStats.points.toLocaleString()} pts</span>
-                  </Link>
-                </DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link to={user.role === "Admin" ? "/admin-dashboard" : "/dashboard"}><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/scanner"><Upload className="mr-2 h-4 w-4" />Upload / Scan</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/pickups"><Truck className="mr-2 h-4 w-4" />Pickup Requests</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/rewards"><Award className="mr-2 h-4 w-4" />Rewards</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/notifications">
                     <Bell className="mr-2 h-4 w-4" />Notifications
@@ -141,10 +157,11 @@ export function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/messages"><MessageSquare className="mr-2 h-4 w-4" />Messages</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/pickups"><Truck className="mr-2 h-4 w-4" />My Requests</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild><Link to="/settings"><SettingsIcon className="mr-2 h-4 w-4" />Profile / Account</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/knowledge"><BookOpen className="mr-2 h-4 w-4" />Education</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/security"><ShieldCheck className="mr-2 h-4 w-4" />Data Security</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/settings"><SettingsIcon className="mr-2 h-4 w-4" />Settings</Link></DropdownMenuItem>
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={toggle}>
                   {theme === "light" ? <Moon className="mr-2 h-4 w-4" /> : <Sun className="mr-2 h-4 w-4" />}
@@ -189,12 +206,21 @@ export function Navbar() {
             ))}
             {hydrated && user && (
               <>
-                <div className="mt-2 border-t border-border pt-2 text-xs uppercase text-muted-foreground px-3">Account</div>
-                <Link to="/settings" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Profile / Account</Link>
+                <div className="mt-2 border-t border-border pt-2 text-xs uppercase text-muted-foreground px-3">Account hub</div>
+                <div className="rounded-2xl border border-border bg-muted px-3 py-3 text-sm text-muted-foreground">
+                  <div className="font-medium text-foreground">{user.fullName}</div>
+                  <div className="text-xs">{user.email}</div>
+                  <div className="mt-2 grid gap-1 text-[11px]">
+                    <div className="flex items-center justify-between"><span>Points</span><span>{dashboardStats.points} pts</span></div>
+                    <div className="flex items-center justify-between"><span>KYC</span><span className={kycBadgeClass}>{kycStatus}</span></div>
+                  </div>
+                </div>
+                <Link to={user.role === "Admin" ? "/admin-dashboard" : "/dashboard"} onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Dashboard</Link>
+                <Link to="/scanner" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Upload / Scan</Link>
+                <Link to="/pickups" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Pickup Requests</Link>
                 <Link to="/rewards" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Rewards</Link>
+                <Link to="/settings" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Profile / Account</Link>
                 <Link to="/notifications" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Notifications</Link>
-                <Link to="/messages" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Messages</Link>
-                <Link to="/settings" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Settings</Link>
                 <button onClick={() => { store.signOut(); setOpen(false); }} className="rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-muted">Logout</button>
               </>
             )}
