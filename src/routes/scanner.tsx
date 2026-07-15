@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PageContainer } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { aiDetections, sectors, type SectorId } from "@/lib/mock-data";
@@ -38,8 +38,19 @@ function classify(file: File): (typeof aiDetections)[number] {
 function Scanner() {
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [capturing, setCapturing] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  const cameraInput = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    return () => {
+      stream?.getTracks().forEach((track) => track.stop());
+    };
+  }, [stream]);
 
   const addFiles = (files: FileList | File[] | null) => {
     if (!files) return;
@@ -67,6 +78,58 @@ function Scanner() {
     });
   };
 
+  const openCamera = async () => {
+    setCameraError(null);
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError("Camera access is not supported in this browser.");
+      return;
+    }
+
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+      setStream(mediaStream);
+      setCameraActive(true);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (error) {
+      console.error(error);
+      setCameraError("Unable to access the device camera. Please allow camera permissions or use an alternative upload method.");
+    }
+  };
+
+  const closeCamera = () => {
+    setCameraActive(false);
+    setStream((prev) => {
+      prev?.getTracks().forEach((track) => track.stop());
+      return null;
+    });
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const file = new File([blob], `camera-${Date.now()}.png`, { type: "image/png" });
+      addFiles([file]);
+      setCapturing(true);
+      setTimeout(() => {
+        setCapturing(false);
+        closeCamera();
+      }, 500);
+    }, "image/png");
+  };
+
   return (
     <PageContainer>
       <div className="max-w-5xl mx-auto">
@@ -74,7 +137,7 @@ function Scanner() {
           <div className="inline-flex items-center gap-2 rounded-full border border-eco/30 bg-eco-soft/50 px-3 py-1 text-xs font-medium">
             <Sparkles className="h-3.5 w-3.5" /> Smart multi-sector classification
           </div>
-          <h1 className="mt-4 font-display text-4xl font-bold">AI Material Scanner</h1>
+          <h1 className="mt-4 font-display text-4xl font-bold"> Material Scanner</h1>
           <p className="mt-2 text-muted-foreground">
             Upload one or more images of your materials or devices. Our AI classifies each item across e-waste, plastic, metal, glass, paper &amp; cardboard, and textiles.
           </p>
@@ -91,7 +154,7 @@ function Scanner() {
             <Button onClick={() => fileInput.current?.click()} className="bg-eco-gradient text-eco-foreground">
               <ImagePlus className="mr-2 h-4 w-4" />Add photos
             </Button>
-            <Button variant="outline" onClick={() => cameraInput.current?.click()}>
+            <Button variant="outline" onClick={openCamera}>
               <Camera className="mr-2 h-4 w-4" />Use camera
             </Button>
             <span className="text-xs text-muted-foreground ml-1">or drag &amp; drop images here</span>
@@ -114,14 +177,47 @@ function Scanner() {
             className="hidden"
             onChange={(e) => { addFiles(e.target.files); e.currentTarget.value = ""; }}
           />
-          <input
-            ref={cameraInput}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => { addFiles(e.target.files); e.currentTarget.value = ""; }}
-          />
+
+          {cameraError && (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {cameraError}
+            </div>
+          )}
+
+          {cameraActive && (
+            <div className="mt-4 rounded-3xl border border-border bg-background p-4">
+              <div className="relative overflow-hidden rounded-3xl bg-black">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="h-80 w-full object-cover"
+                />
+                <div className="absolute inset-0 flex items-end justify-center p-4">
+                  <button
+                    type="button"
+                    onClick={capturePhoto}
+                    className="inline-flex items-center gap-2 rounded-full bg-eco-gradient px-4 py-2 text-sm font-semibold text-eco-foreground shadow-lg"
+                    disabled={capturing}
+                  >
+                    <Camera className="h-4 w-4" />
+                    {capturing ? "Capturing…" : "Snap photo"}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeCamera}
+                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-background/90 text-sm text-muted-foreground shadow"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <p className="mt-3 text-center text-sm text-muted-foreground">
+                Point your camera at the material and tap snap. If camera access fails, use the file upload button.
+              </p>
+            </div>
+          )}
 
           {uploads.length === 0 ? (
             <div className="mt-4 grid place-items-center rounded-xl border border-dashed border-border py-14 text-center">

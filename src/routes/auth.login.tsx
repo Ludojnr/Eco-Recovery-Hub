@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import * as React from "react";
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,15 +15,15 @@ export const Route = createFileRoute("/auth/login")({
 
 function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(true);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [remember, setRemember] = React.useState(true);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     try {
       store.signIn(email, password);
-      toast.success("Welcome back!");
+      toast.success("Welcome !");
       const activeUser = store.getSnapshot().user;
       if (activeUser && activeUser.role === "Admin") {
         navigate({ to: "/admin-dashboard" });
@@ -51,7 +51,7 @@ function Login() {
         </div>
         
         <div className="text-xs border border-dashed border-border rounded-lg p-3 bg-muted/30 text-muted-foreground mt-4 space-y-1">
-          <div className="font-semibold text-foreground text-center">Exhibition Demo Credentials:</div>
+          <div className="font-semibold text-foreground text-center"> Demo Credentials:</div>
           <div className="flex justify-between">
             <span>Admin:</span>
             <span className="font-mono text-foreground font-semibold">admin@ecorecovery.org / admin123</span>
@@ -67,7 +67,7 @@ function Login() {
           <Button type="button" variant="outline" disabled>Google</Button>
           <Button type="button" variant="outline" disabled>Microsoft</Button>
         </div>
-        <p className="text-center text-xs text-muted-foreground">Social sign-in coming soon</p>
+        <p className="text-center text-xs text-muted-foreground">Feature coming soon</p>
       </form>
     </AuthLayout>
   );

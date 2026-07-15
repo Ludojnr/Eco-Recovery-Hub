@@ -12,17 +12,23 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TradeInRouteImport } from './routes/trade-in'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SecurityRouteImport } from './routes/security'
+import { Route as SectorsRouteImport } from './routes/sectors'
 import { Route as ScannerRouteImport } from './routes/scanner'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as PickupsRouteImport } from './routes/pickups'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MapRouteImport } from './routes/map'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
+import { Route as EventsRouteImport } from './routes/events'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as AdminDashboardRouteImport } from './routes/admin-dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SectorsSectorIdRouteImport } from './routes/sectors.$sectorId'
+import { Route as InstitutionsInstIdRouteImport } from './routes/institutions.$instId'
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 
@@ -39,6 +45,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const SecurityRoute = SecurityRouteImport.update({
   id: '/security',
   path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SectorsRoute = SectorsRouteImport.update({
+  id: '/sectors',
+  path: '/sectors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScannerRoute = ScannerRouteImport.update({
@@ -66,9 +77,19 @@ const MessagesRoute = MessagesRouteImport.update({
   path: '/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MapRoute = MapRouteImport.update({
   id: '/map',
   path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KnowledgeRoute = KnowledgeRouteImport.update({
@@ -76,9 +97,19 @@ const KnowledgeRoute = KnowledgeRouteImport.update({
   path: '/knowledge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
@@ -92,8 +123,13 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SectorsSectorIdRoute = SectorsSectorIdRouteImport.update({
-  id: '/sectors/$sectorId',
-  path: '/sectors/$sectorId',
+  id: '/$sectorId',
+  path: '/$sectorId',
+  getParentRoute: () => SectorsRoute,
+} as any)
+const InstitutionsInstIdRoute = InstitutionsInstIdRouteImport.update({
+  id: '/institutions/$instId',
+  path: '/institutions/$instId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
@@ -110,56 +146,74 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin-dashboard': typeof AdminDashboardRoute
+  '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
+  '/events': typeof EventsRoute
   '/knowledge': typeof KnowledgeRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/map': typeof MapRoute
+  '/marketplace': typeof MarketplaceRoute
   '/messages': typeof MessagesRoute
   '/notifications': typeof NotificationsRoute
   '/pickups': typeof PickupsRoute
   '/rewards': typeof RewardsRoute
   '/scanner': typeof ScannerRoute
+  '/sectors': typeof SectorsRouteWithChildren
   '/security': typeof SecurityRoute
   '/settings': typeof SettingsRoute
   '/trade-in': typeof TradeInRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/institutions/$instId': typeof InstitutionsInstIdRoute
   '/sectors/$sectorId': typeof SectorsSectorIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin-dashboard': typeof AdminDashboardRoute
+  '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
+  '/events': typeof EventsRoute
   '/knowledge': typeof KnowledgeRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/map': typeof MapRoute
+  '/marketplace': typeof MarketplaceRoute
   '/messages': typeof MessagesRoute
   '/notifications': typeof NotificationsRoute
   '/pickups': typeof PickupsRoute
   '/rewards': typeof RewardsRoute
   '/scanner': typeof ScannerRoute
+  '/sectors': typeof SectorsRouteWithChildren
   '/security': typeof SecurityRoute
   '/settings': typeof SettingsRoute
   '/trade-in': typeof TradeInRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/institutions/$instId': typeof InstitutionsInstIdRoute
   '/sectors/$sectorId': typeof SectorsSectorIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin-dashboard': typeof AdminDashboardRoute
+  '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
+  '/events': typeof EventsRoute
   '/knowledge': typeof KnowledgeRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/map': typeof MapRoute
+  '/marketplace': typeof MarketplaceRoute
   '/messages': typeof MessagesRoute
   '/notifications': typeof NotificationsRoute
   '/pickups': typeof PickupsRoute
   '/rewards': typeof RewardsRoute
   '/scanner': typeof ScannerRoute
+  '/sectors': typeof SectorsRouteWithChildren
   '/security': typeof SecurityRoute
   '/settings': typeof SettingsRoute
   '/trade-in': typeof TradeInRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/institutions/$instId': typeof InstitutionsInstIdRoute
   '/sectors/$sectorId': typeof SectorsSectorIdRoute
 }
 export interface FileRouteTypes {
@@ -167,75 +221,98 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin-dashboard'
+    | '/community'
     | '/dashboard'
+    | '/events'
     | '/knowledge'
+    | '/leaderboard'
     | '/map'
+    | '/marketplace'
     | '/messages'
     | '/notifications'
     | '/pickups'
     | '/rewards'
     | '/scanner'
+    | '/sectors'
     | '/security'
     | '/settings'
     | '/trade-in'
     | '/auth/login'
     | '/auth/signup'
+    | '/institutions/$instId'
     | '/sectors/$sectorId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin-dashboard'
+    | '/community'
     | '/dashboard'
+    | '/events'
     | '/knowledge'
+    | '/leaderboard'
     | '/map'
+    | '/marketplace'
     | '/messages'
     | '/notifications'
     | '/pickups'
     | '/rewards'
     | '/scanner'
+    | '/sectors'
     | '/security'
     | '/settings'
     | '/trade-in'
     | '/auth/login'
     | '/auth/signup'
+    | '/institutions/$instId'
     | '/sectors/$sectorId'
   id:
     | '__root__'
     | '/'
     | '/admin-dashboard'
+    | '/community'
     | '/dashboard'
+    | '/events'
     | '/knowledge'
+    | '/leaderboard'
     | '/map'
+    | '/marketplace'
     | '/messages'
     | '/notifications'
     | '/pickups'
     | '/rewards'
     | '/scanner'
+    | '/sectors'
     | '/security'
     | '/settings'
     | '/trade-in'
     | '/auth/login'
     | '/auth/signup'
+    | '/institutions/$instId'
     | '/sectors/$sectorId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  CommunityRoute: typeof CommunityRoute
   DashboardRoute: typeof DashboardRoute
+  EventsRoute: typeof EventsRoute
   KnowledgeRoute: typeof KnowledgeRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   MapRoute: typeof MapRoute
+  MarketplaceRoute: typeof MarketplaceRoute
   MessagesRoute: typeof MessagesRoute
   NotificationsRoute: typeof NotificationsRoute
   PickupsRoute: typeof PickupsRoute
   RewardsRoute: typeof RewardsRoute
   ScannerRoute: typeof ScannerRoute
+  SectorsRoute: typeof SectorsRouteWithChildren
   SecurityRoute: typeof SecurityRoute
   SettingsRoute: typeof SettingsRoute
   TradeInRoute: typeof TradeInRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
-  SectorsSectorIdRoute: typeof SectorsSectorIdRoute
+  InstitutionsInstIdRoute: typeof InstitutionsInstIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -259,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/security'
       fullPath: '/security'
       preLoaderRoute: typeof SecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sectors': {
+      id: '/sectors'
+      path: '/sectors'
+      fullPath: '/sectors'
+      preLoaderRoute: typeof SectorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scanner': {
@@ -296,11 +380,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/map': {
       id: '/map'
       path: '/map'
       fullPath: '/map'
       preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/knowledge': {
@@ -310,11 +408,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KnowledgeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-dashboard': {
@@ -333,9 +445,16 @@ declare module '@tanstack/react-router' {
     }
     '/sectors/$sectorId': {
       id: '/sectors/$sectorId'
-      path: '/sectors/$sectorId'
+      path: '/$sectorId'
       fullPath: '/sectors/$sectorId'
       preLoaderRoute: typeof SectorsSectorIdRouteImport
+      parentRoute: typeof SectorsRoute
+    }
+    '/institutions/$instId': {
+      id: '/institutions/$instId'
+      path: '/institutions/$instId'
+      fullPath: '/institutions/$instId'
+      preLoaderRoute: typeof InstitutionsInstIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
@@ -355,23 +474,39 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SectorsRouteChildren {
+  SectorsSectorIdRoute: typeof SectorsSectorIdRoute
+}
+
+const SectorsRouteChildren: SectorsRouteChildren = {
+  SectorsSectorIdRoute: SectorsSectorIdRoute,
+}
+
+const SectorsRouteWithChildren =
+  SectorsRoute._addFileChildren(SectorsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  CommunityRoute: CommunityRoute,
   DashboardRoute: DashboardRoute,
+  EventsRoute: EventsRoute,
   KnowledgeRoute: KnowledgeRoute,
+  LeaderboardRoute: LeaderboardRoute,
   MapRoute: MapRoute,
+  MarketplaceRoute: MarketplaceRoute,
   MessagesRoute: MessagesRoute,
   NotificationsRoute: NotificationsRoute,
   PickupsRoute: PickupsRoute,
   RewardsRoute: RewardsRoute,
   ScannerRoute: ScannerRoute,
+  SectorsRoute: SectorsRouteWithChildren,
   SecurityRoute: SecurityRoute,
   SettingsRoute: SettingsRoute,
   TradeInRoute: TradeInRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
-  SectorsSectorIdRoute: SectorsSectorIdRoute,
+  InstitutionsInstIdRoute: InstitutionsInstIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

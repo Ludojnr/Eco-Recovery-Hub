@@ -1,15 +1,3 @@
-declare module "react" {
-  const React: any;
-  export = React;
-}
-
-declare module "react/jsx-runtime" {
-  export function jsx(type: any, props: any, key?: any): any;
-  export function jsxs(type: any, props: any, key?: any): any;
-  export function jsxDEV(type: any, props: any, key?: any): any;
-  export const Fragment: any;
-}
-
 declare module "@radix-ui/react-label" {
   export const Root: any;
 }

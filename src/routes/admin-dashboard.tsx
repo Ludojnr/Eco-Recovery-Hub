@@ -1,3 +1,4 @@
+import type * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useHydrated, store, useUser } from "@/lib/mock-store";
 import { useTheme } from "@/lib/theme";
@@ -40,6 +41,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { UserAvatar } from "@/routes/settings";
 
 export const Route = createFileRoute("/admin-dashboard")({
   head: () => ({ meta: [{ title: "Admin Portal — Eco-Recovery Hub" }] }),
@@ -89,6 +91,7 @@ type TabType =
   | "notifications"
   | "analytics"
   | "audit"
+  | "community"
   | "settings";
 
 function AdminDashboardLayout() {
@@ -126,13 +129,21 @@ function AdminDashboardLayout() {
     navigate({ to: "/auth/login" });
   };
 
-  const menuItems = [
+  type MenuItem = {
+    id: TabType;
+    label: string;
+    icon: typeof LayoutDashboard;
+    badge?: number;
+  };
+
+  const menuItems: MenuItem[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "users", label: "User Management", icon: Users },
     { id: "institutions", label: "Institutional Users", icon: Building },
     { id: "materials", label: "Material Management", icon: Layers },
     { id: "scanner", label: "Scanner Review", icon: Scan },
     { id: "pickups", label: "Pickup Requests", icon: Truck },
+    { id: "community", label: "Community", icon: Users },
     { id: "kyc", label: "KYC Verification", icon: UserCheck },
     { id: "rewards", label: "Rewards Management", icon: Award },
     { id: "messages", label: "Messages", icon: MessageSquare, badge: snap.chats.filter(c => c.adminUnreadCount > 0).length },
@@ -140,7 +151,7 @@ function AdminDashboardLayout() {
     { id: "analytics", label: "Reports & Analytics", icon: BarChart3 },
     { id: "audit", label: "Audit Logs", icon: ScrollText },
     { id: "settings", label: "Settings", icon: SettingsIcon },
-  ] as const;
+  ];
 
   return (
     <div className={`min-h-screen font-sans antialiased bg-background text-foreground flex flex-col md:flex-row`}>
@@ -187,9 +198,7 @@ function AdminDashboardLayout() {
         {/* Footer Area with Logout */}
         <div className="p-4 border-t border-border space-y-2 bg-muted/50 shrink-0">
           <div className="flex items-center gap-3 px-2 py-1">
-            <div className="h-8 w-8 rounded-full bg-eco-gradient grid place-items-center text-xs font-bold text-background">
-              {user.fullName.charAt(0).toUpperCase()}
-            </div>
+            <UserAvatar user={user} size="sm" className="rounded-full" />
             <div className="min-w-0">
               <div className="text-xs font-semibold truncate">{user.fullName}</div>
               <div className="text-[10px] text-muted-foreground truncate">Sys Administrator</div>
@@ -261,6 +270,8 @@ function ActiveTabContent({ activeTab, snap, globalSearch }: { activeTab: TabTyp
       return <AdminScannerReview snap={snap} />;
     case "pickups":
       return <AdminPickupManagement snap={snap} />;
+    case "community":
+      return <AdminCommunityManagement snap={snap} globalSearch={globalSearch} />;
     case "kyc":
       return <AdminKycPanel snap={snap} />;
     case "rewards":
@@ -488,10 +499,8 @@ function AdminUserManagement({ snap, globalSearch }: { snap: any; globalSearch: 
             {filteredUsers.map((u: any) => (
               <tr key={u.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                 <td className="p-3">
-                  <div className="flex items-center gap-3">
-                    <span className="h-7 w-7 rounded-full bg-eco-gradient text-[10px] font-bold text-background grid place-items-center uppercase">
-                      {u.fullName.charAt(0)}
-                    </span>
+                    <div className="flex items-center gap-3">
+                    <UserAvatar user={u} size="sm" className="rounded-full" />
                     <div>
                       <div className="font-semibold text-foreground">{u.fullName}</div>
                       <div className="text-[10px] text-muted-foreground">{u.email} · {u.phone}</div>
@@ -550,9 +559,7 @@ function AdminUserManagement({ snap, globalSearch }: { snap: any; globalSearch: 
             </div>
             <div className="p-6 space-y-6 overflow-y-auto max-h-[500px]">
               <div className="flex items-center gap-4 border-b border-border pb-4">
-                <div className="h-14 w-14 rounded-full bg-eco-gradient text-lg font-bold text-background grid place-items-center">
-                  {selectedUser.fullName.charAt(0)}
-                </div>
+                <UserAvatar user={selectedUser} size="lg" className="rounded-full" />
                 <div>
                   <h3 className="font-bold text-lg flex items-center gap-2">
                     {selectedUser.fullName}
@@ -1503,7 +1510,7 @@ function AdminMessagingCentre({ snap }: { snap: any }) {
               {/* Chat Thread */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-background/40">
                 {activeChat.messages.map((m: any) => {
-                  const isAdmin = m.senderId === "admin";
+                  const isAdmin = m.senderId === "admin" || m.senderId === "admin-system";
                   return (
                     <div key={m.id} className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[70%] rounded-lg p-2.5 text-xs ${
@@ -1525,7 +1532,7 @@ function AdminMessagingCentre({ snap }: { snap: any }) {
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (!replyText.trim()) return;
-                  store.sendMessage(activeChat.userId, replyText, true);
+                  store.sendMessage(activeChat.userId, replyText);
                   setReplyText("");
                   toast.success("Reply dispatched.");
                 }}

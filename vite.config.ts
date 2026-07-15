@@ -15,6 +15,7 @@ export default defineConfig({
   },
   vite: {
     resolve: {
+      tsconfigPaths: true,
       alias: [
         {
           find: /lovable-tagger\/node_modules\/tailwindcss/,

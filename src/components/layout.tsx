@@ -18,6 +18,8 @@ import {
   ShieldCheck,
   BadgeCheck,
   User as UserIcon,
+  Users,
+  ShoppingBag,
 } from "lucide-react";
 import { useHydrated, useUser, store } from "@/lib/mock-store";
 import { useTheme } from "@/lib/theme";
@@ -31,16 +33,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { notifications, dashboardStats } from "@/lib/mock-data";
+import { UserAvatar } from "@/routes/settings";
 
 const navLinks = [
   { to: "/", label: "Home" },
+  { to: "/sectors", label: "Sectors" },
+  { to: "/marketplace", label: "Marketplace" },
   { to: "/scanner", label: "AI Scanner" },
+  { to: "/community", label: "Community" },
+  { to: "/leaderboard", label: "Leaderboard" },
   { to: "/map", label: "Recycling Map" },
-  { to: "/pickups", label: "Pickup Requests" },
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/knowledge", label: "Education" },
-  { to: "/trade-in", label: "Trade-In Estimator" },
-  { to: "/security", label: "Data Security" },
+  { to: "/pickups", label: "Pickups" },
 ] as const;
 
 export function BrandMark({ className = "" }: { className?: string }) {
@@ -67,6 +70,7 @@ export function Navbar() {
   const user = snap.user;
   const userNotifications = user ? snap.notifications.filter((n) => n.userId === user.id) : [];
   const unread = userNotifications.filter((n) => n.unread).length;
+  const unreadMessages = user ? snap.chats.filter(c => c.userId === user.id).reduce((sum, c) => sum + c.unreadCount, 0) : 0;
   const kycStatus = user?.kycStatus ?? "Not Started";
   const kycBadgeClass =
     kycStatus === "Verified"
@@ -119,23 +123,22 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <button
                   aria-label="Open account menu"
-                  className="ml-1 flex items-center gap-2 rounded-full border border-border pl-1 pr-2 py-1 hover:bg-muted"
+                  className="ml-1 flex items-center gap-2 rounded-full border border-border pl-1 pr-3 py-1 hover:bg-muted"
                 >
-                  <span className="grid h-7 w-7 place-items-center rounded-full bg-eco-gradient text-xs font-bold text-eco-foreground">
-                    {user.fullName.charAt(0).toUpperCase()}
-                  </span>
-                  <Menu className="h-4 w-4" />
+                  <UserAvatar user={user} size="sm" className="rounded-full" />
+                  <span className="hidden sm:block text-sm font-medium max-w-[80px] truncate">{user.fullName.split(' ')[0]}</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
                 <DropdownMenuLabel>
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <div className="font-medium">{user.fullName}</div>
+                    <div className="flex items-center gap-3">
+                      <UserAvatar user={user} size="md" className="rounded-xl" />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">{user.fullName} <span className="text-xs text-muted-foreground font-normal">({user.role})</span></div>
                         <div className="text-xs font-normal text-muted-foreground truncate">{user.email}</div>
                       </div>
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${kycBadgeClass}`}>
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${kycBadgeClass}`}>
                         <BadgeCheck className="h-3 w-3" /> {kycStatus}
                       </span>
                     </div>
@@ -146,8 +149,11 @@ export function Navbar() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild><Link to={user.role === "Admin" ? "/admin-dashboard" : "/dashboard"}><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to={user.role === "Admin" ? "/admin-dashboard" : "/dashboard"}><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/scanner"><Upload className="mr-2 h-4 w-4" />Upload / Scan</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/marketplace"><ShoppingBag className="mr-2 h-4 w-4" />Marketplace</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/community"><Users className="mr-2 h-4 w-4" />Community</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/leaderboard"><Award className="mr-2 h-4 w-4" />Leaderboard</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/pickups"><Truck className="mr-2 h-4 w-4" />Pickup Requests</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/rewards"><Award className="mr-2 h-4 w-4" />Rewards</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -156,7 +162,12 @@ export function Navbar() {
                     {unread > 0 && <span className="ml-auto rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">{unread}</span>}
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/messages"><MessageSquare className="mr-2 h-4 w-4" />Messages</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/messages">
+                    <MessageSquare className="mr-2 h-4 w-4" />Messages
+                    {unreadMessages > 0 && <span className="ml-auto rounded-full bg-leaf px-1.5 text-[10px] font-bold text-background">{unreadMessages}</span>}
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild><Link to="/settings"><SettingsIcon className="mr-2 h-4 w-4" />Profile / Account</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/knowledge"><BookOpen className="mr-2 h-4 w-4" />Education</Link></DropdownMenuItem>
@@ -208,8 +219,13 @@ export function Navbar() {
               <>
                 <div className="mt-2 border-t border-border pt-2 text-xs uppercase text-muted-foreground px-3">Account hub</div>
                 <div className="rounded-2xl border border-border bg-muted px-3 py-3 text-sm text-muted-foreground">
-                  <div className="font-medium text-foreground">{user.fullName}</div>
-                  <div className="text-xs">{user.email}</div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <UserAvatar user={user} size="sm" className="rounded-xl" />
+                    <div>
+                      <div className="font-medium text-foreground">{user.fullName}</div>
+                      <div className="text-xs">{user.email}</div>
+                    </div>
+                  </div>
                   <div className="mt-2 grid gap-1 text-[11px]">
                     <div className="flex items-center justify-between"><span>Points</span><span>{dashboardStats.points} pts</span></div>
                     <div className="flex items-center justify-between"><span>KYC</span><span className={kycBadgeClass}>{kycStatus}</span></div>
@@ -217,10 +233,18 @@ export function Navbar() {
                 </div>
                 <Link to={user.role === "Admin" ? "/admin-dashboard" : "/dashboard"} onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Dashboard</Link>
                 <Link to="/scanner" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Upload / Scan</Link>
+                <Link to="/marketplace" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Marketplace</Link>
+                <Link to="/community" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Community Feed</Link>
+                <Link to="/leaderboard" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Leaderboard</Link>
                 <Link to="/pickups" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Pickup Requests</Link>
                 <Link to="/rewards" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Rewards</Link>
                 <Link to="/settings" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Profile / Account</Link>
-                <Link to="/notifications" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2 text-sm hover:bg-muted">Notifications</Link>
+                <Link to="/notifications" onClick={() => setOpen(false)} className="flex justify-between items-center rounded-lg px-3 py-2 text-sm hover:bg-muted">
+                  Notifications {unread > 0 && <span className="rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">{unread}</span>}
+                </Link>
+                <Link to="/messages" onClick={() => setOpen(false)} className="flex justify-between items-center rounded-lg px-3 py-2 text-sm hover:bg-muted">
+                  Messages {unreadMessages > 0 && <span className="rounded-full bg-leaf px-1.5 text-[10px] font-bold text-background">{unreadMessages}</span>}
+                </Link>
                 <button onClick={() => { store.signOut(); setOpen(false); }} className="rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-muted">Logout</button>
               </>
             )}

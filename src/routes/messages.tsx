@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageContainer, RequireUser } from "@/components/layout";
 import { store, useUser } from "@/lib/mock-store";
+import { UserAvatar } from "@/routes/settings";
 import { useState, useSyncExternalStore, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -140,29 +141,27 @@ function UserChatPanel({ snap, user }: { snap: any; user: any }) {
                 const isMe = m.senderId === user.id;
                 return (
                   <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                    <div className="max-w-[75%] space-y-0.5">
-                      <div className={`text-[10px] text-muted-foreground px-1 ${isMe ? "text-right" : "text-left"}`}>
+                    <div className={`flex max-w-[75%] flex-col ${isMe ? "items-end" : "items-start"} space-y-2`}>
+                      <div className={`text-[10px] px-1 ${isMe ? "text-right text-muted-foreground" : "text-left text-muted-foreground"}`}>
                         {m.senderName} · {formatTime(m.timestamp)}
                       </div>
-                      <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm leading-relaxed ${
+                      <div className={`rounded-3xl px-4 py-3 text-sm leading-relaxed ${
                         isMe 
-                          ? "bg-eco-gradient text-eco-foreground rounded-br-none font-medium" 
-                          : m.senderId === "admin-system"
-                            ? "bg-eco-soft/40 text-foreground border border-eco/10 rounded-bl-none font-medium"
-                            : "bg-background text-foreground border border-border rounded-bl-none"
+                          ? "bg-eco-gradient text-white shadow-[0_8px_30px_-14px_rgba(16,185,129,0.55)] rounded-br-none" 
+                          : "bg-muted/90 text-foreground border border-border shadow-sm rounded-bl-none"
                       }`}>
                         {m.text}
                         {m.fileUrl && (
-                          <div className="mt-2 border rounded-lg overflow-hidden bg-background max-w-[200px] border-border/80">
+                          <div className="mt-3 overflow-hidden rounded-2xl border border-border/80 bg-muted">
                             {m.isImage ? (
                               <img src={m.fileUrl} alt={m.fileName} className="h-28 w-full object-cover" />
                             ) : (
-                              <div className="p-2 flex items-center gap-2 text-xs">
+                              <div className="p-2 flex items-center gap-2 text-xs text-muted-foreground">
                                 <Paperclip className="h-4 w-4 text-leaf" />
                                 <span className="truncate">{m.fileName}</span>
                               </div>
                             )}
-                            <div className="p-1.5 text-[10px] text-muted-foreground font-semibold border-t truncate bg-muted/10 text-center">
+                            <div className="p-2 text-[10px] text-muted-foreground border-t bg-background text-center font-semibold">
                               {m.fileName}
                             </div>
                           </div>
@@ -379,9 +378,7 @@ function AdminChatDashboard({ snap, user }: { snap: any; user: any }) {
                       isActive ? "bg-eco-soft/30 border-l-4 border-leaf" : ""
                     }`}
                   >
-                    <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-eco-soft font-bold text-xs text-leaf">
-                      {c.userName.charAt(0).toUpperCase()}
-                    </div>
+                    <UserAvatar user={{ fullName: c.userName, avatar: snap.users.find((u: any) => u.id === c.userId)?.avatar, role: "User" }} size="sm" className="rounded-full shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline">
                         <div className="font-bold text-xs truncate text-foreground">{c.userName}</div>
@@ -414,9 +411,7 @@ function AdminChatDashboard({ snap, user }: { snap: any; user: any }) {
               {/* Header with resolve button */}
               <div className="p-4 border-b bg-background flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-full bg-eco-gradient text-eco-foreground font-bold text-sm">
-                    {activeChat.userName.charAt(0).toUpperCase()}
-                  </div>
+                  <UserAvatar user={{ fullName: activeChat.userName, avatar: snap.users.find((u: any) => u.id === activeChat.userId)?.avatar, role: "User" }} size="sm" className="rounded-full" />
                   <div>
                     <div className="font-bold text-sm flex items-center gap-1.5">
                       {activeChat.userName}
@@ -449,27 +444,27 @@ function AdminChatDashboard({ snap, user }: { snap: any; user: any }) {
                   const isMe = m.senderId === user.id || m.senderId === "admin";
                   return (
                     <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                      <div className="max-w-[75%] space-y-0.5">
-                        <div className={`text-[10px] text-muted-foreground px-1 ${isMe ? "text-right" : "text-left"}`}>
+                      <div className={`flex max-w-[75%] flex-col ${isMe ? "items-end" : "items-start"} space-y-2`}>
+                        <div className={`text-[10px] px-1 ${isMe ? "text-right text-foreground/80" : "text-left text-muted-foreground"}`}>
                           {m.senderName} · {formatTime(m.timestamp)}
                         </div>
-                        <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm leading-relaxed ${
+                        <div className={`rounded-3xl px-4 py-3 text-sm leading-relaxed ${
                           isMe 
-                            ? "bg-eco-gradient text-eco-foreground rounded-br-none font-medium" 
-                            : "bg-background text-foreground border border-border rounded-bl-none"
+                            ? "bg-eco-gradient text-white shadow-[0_8px_30px_-14px_rgba(16,185,129,0.55)] rounded-br-none" 
+                            : "bg-muted/90 text-foreground border border-border shadow-sm rounded-bl-none"
                         }`}>
                           {m.text}
                           {m.fileUrl && (
-                            <div className="mt-2 border rounded-lg overflow-hidden bg-background max-w-[200px] border-border">
+                            <div className="mt-3 overflow-hidden rounded-2xl border border-border/80 bg-muted">
                               {m.isImage ? (
                                 <img src={m.fileUrl} alt={m.fileName} className="h-28 w-full object-cover" />
                               ) : (
-                                <div className="p-2 flex items-center gap-2 text-xs">
+                                <div className="p-2 flex items-center gap-2 text-xs text-muted-foreground">
                                   <Paperclip className="h-4 w-4 text-leaf" />
                                   <span className="truncate">{m.fileName}</span>
                                 </div>
                               )}
-                              <div className="p-1 text-[10px] text-muted-foreground border-t truncate bg-muted/10 text-center font-bold">
+                              <div className="p-2 text-[10px] text-muted-foreground border-t bg-background text-center font-semibold">
                                 {m.fileName}
                               </div>
                             </div>

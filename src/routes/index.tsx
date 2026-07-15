@@ -110,24 +110,38 @@ function Landing() {
               into the right recovery stream with sector-specific handling guidance.
             </p>
           </div>
-          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {sectors.map((s) => (
               <Link
                 key={s.id}
                 to="/sectors/$sectorId"
                 params={{ sectorId: s.id }}
-                className="surface-card p-6 hover:border-eco transition-colors text-left flex flex-col justify-between group"
+                className="surface-card overflow-hidden hover:border-eco transition-colors text-left flex flex-col group"
               >
-                <div>
-                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-eco-soft text-2xl group-hover:scale-105 transition-transform">{s.icon}</div>
-                  <h3 className="mt-4 font-display text-xl font-semibold group-hover:text-leaf transition-colors">{s.name}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{s.short}</p>
+                {/* Photo header */}
+                <div className="relative h-44 overflow-hidden">
+                  <img
+                    src={s.photo}
+                    alt={s.name}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                  <div className="absolute bottom-3 left-3">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 px-2.5 py-1 text-xs font-semibold text-white">
+                      <span>{s.icon}</span> {s.name}
+                    </span>
+                  </div>
+                </div>
+                {/* Content */}
+                <div className="flex flex-col flex-1 p-5">
+                  <p className="text-sm text-muted-foreground">{s.short}</p>
                   <div className="mt-3 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
                     <span className="font-medium text-foreground">Examples: </span>{s.examples}
                   </div>
-                </div>
-                <div className="mt-4 inline-flex items-center text-xs font-semibold text-leaf group-hover:underline">
-                  View sector details &rarr;
+                  <div className="mt-auto pt-4 inline-flex items-center text-xs font-semibold text-leaf group-hover:underline">
+                    View sector details &rarr;
+                  </div>
                 </div>
               </Link>
             ))}

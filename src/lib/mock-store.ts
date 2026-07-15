@@ -114,6 +114,82 @@ export type AppNotification = {
   unread: boolean;
 };
 
+export type CommunityComment = {
+  id: string;
+  postId: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  userRole: string;
+  text: string;
+  timestamp: string;
+};
+
+export type CommunityPost = {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  userRole: "User" | "Admin";
+  userBadges?: string[];
+  timestamp: string;
+  sector?: string;
+  text: string;
+  mediaUrl?: string;
+  mediaType?: "image" | "video";
+  likes: string[]; // userIds
+  helpful: string[]; // userIds
+  niceWork: string[]; // userIds
+  comments: CommunityComment[];
+  reported: boolean;
+  reportsCount: number;
+  visibility: "Public" | "Friends" | "Institution Only" | "Private";
+};
+
+export type CommunityChallenge = {
+  id: string;
+  title: string;
+  description: string;
+  points: number;
+  co2: number;
+  daysRemaining: number;
+  targetQuantity: number;
+  progress: number;
+  completed: boolean;
+  sector: string;
+};
+
+export type CommunityEvent = {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  host: string;
+  hostLogo?: string;
+  volunteers: string[]; // userIds
+  maxVolunteers?: number;
+  imageUrl?: string;
+};
+
+export type MarketplaceListing = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  points: number;
+  sellerId: string;
+  sellerName: string;
+  sellerAvatar?: string;
+  sellerRole: "User" | "Admin";
+  sector: string;
+  quantity: number;
+  imageUrl?: string;
+  dateListed: string;
+  status: "Available" | "Sold";
+};
+
 type State = {
   user: User | null;
   users: Array<User & { password: string }>;
@@ -122,6 +198,10 @@ type State = {
   chats: ChatConversation[];
   notifications: AppNotification[];
   auditLogs: AuditLog[];
+  posts: CommunityPost[];
+  challenges: CommunityChallenge[];
+  events: CommunityEvent[];
+  marketplace: MarketplaceListing[];
 };
 
 const KEY = "eco-recovery-hub-state-v2";
@@ -409,6 +489,191 @@ function getInitialState(): State {
     }
   ];
 
+  const initialPosts: CommunityPost[] = [
+    {
+      id: "post-1",
+      userId: "user-kwame",
+      userName: "Kwame Opoku",
+      userAvatar: undefined,
+      userRole: "User",
+      userBadges: ["🌱 Green Starter", "♻ Community Recycler"],
+      timestamp: new Date("2026-07-13T10:00:00Z").toISOString(),
+      sector: "plastic",
+      text: "Just dropped off 15 PET water bottles at the Accra collection point today! Super easy process, and I earned 150 points. Let's keep Accra clean! 🧴♻ #PlasticRecycling #GoGreen",
+      mediaUrl: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80",
+      mediaType: "image",
+      likes: ["user-ktu", "admin-system"],
+      helpful: ["user-ktu"],
+      niceWork: ["admin-system"],
+      comments: [
+        {
+          id: "comment-1",
+          postId: "post-1",
+          userId: "user-ktu",
+          userName: "Koforidua Technical University",
+          userRole: "User",
+          text: "Excellent work, Kwame! Setting a great example for all of us.",
+          timestamp: new Date("2026-07-13T10:30:00Z").toISOString()
+        }
+      ],
+      reported: false,
+      reportsCount: 0,
+      visibility: "Public"
+    },
+    {
+      id: "post-2",
+      userId: "user-ktu",
+      userName: "Koforidua Technical University",
+      userAvatar: undefined,
+      userRole: "User",
+      userBadges: ["🏢 Institutional Partner", "🏆 Sustainability Ambassador"],
+      timestamp: new Date("2026-07-14T07:00:00Z").toISOString(),
+      sector: "plastic",
+      text: "📢 KTU Campus Recycling Drive starts this Saturday! Join us at the campus courtyard for our weekly collection drive. Bring all plastic bottles, cardboard cartons, and old charging cables. Let's make Koforidua green! 🏫💚 #CleanCampus #EcoRecoveryHub",
+      mediaUrl: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80",
+      mediaType: "image",
+      likes: ["user-kwame"],
+      helpful: ["user-kwame"],
+      niceWork: ["user-kwame"],
+      comments: [],
+      reported: false,
+      reportsCount: 0,
+      visibility: "Public"
+    }
+  ];
+
+  const initialChallenges: CommunityChallenge[] = [
+    {
+      id: "challenge-1",
+      title: "Collect 20 Plastic Bottles",
+      description: "Recycle plastic bottles to earn bonus points and save carbon emissions.",
+      points: 250,
+      co2: 5.5,
+      daysRemaining: 12,
+      targetQuantity: 20,
+      progress: 15,
+      completed: false,
+      sector: "plastic"
+    },
+    {
+      id: "challenge-2",
+      title: "E-Waste Recovery Drive",
+      description: "Recover old electronics, chargers, and wires to prevent heavy metal contamination.",
+      points: 400,
+      co2: 12.0,
+      daysRemaining: 5,
+      targetQuantity: 3,
+      progress: 1,
+      completed: false,
+      sector: "e-waste"
+    },
+    {
+      id: "challenge-3",
+      title: "Sort Your Textiles",
+      description: "Recycle clothes, linens, or fabric offcuts to earn points.",
+      points: 150,
+      co2: 3.5,
+      daysRemaining: 20,
+      targetQuantity: 5,
+      progress: 5,
+      completed: true,
+      sector: "textile"
+    }
+  ];
+
+  const initialEvents: CommunityEvent[] = [
+    {
+      id: "event-1",
+      title: "Campus Recycling Day",
+      description: "Join Koforidua Technical University's weekly recycling campaign. Volunteers will help sort plastic, paper, and electronic items collected from dormitory blocks.",
+      date: "2026-07-19",
+      time: "09:00 AM",
+      location: "KTU Courtyard, Koforidua",
+      host: "Koforidua Technical University",
+      hostLogo: undefined,
+      volunteers: ["user-kwame"],
+      maxVolunteers: 50,
+      imageUrl: "https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&q=80"
+    },
+    {
+      id: "event-2",
+      title: "Accra Beach Clean-up",
+      description: "Help clean up plastic waste and marine debris at Labadi Beach. Gloves, collection bags, and snacks will be provided to all registered volunteers.",
+      date: "2026-07-25",
+      time: "08:00 AM",
+      location: "Labadi Beach, Accra",
+      host: "Eco-Recovery Hub HQ",
+      hostLogo: undefined,
+      volunteers: [],
+      maxVolunteers: 100,
+      imageUrl: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=800&q=80"
+    },
+    {
+      id: "event-3",
+      title: "E-Waste Recycling Seminar & Expo",
+      description: "Learn about the hazards of electronic waste and circular economy opportunities in Ghana. Certified handlers will be on-site to wipe devices and collect electronics safely.",
+      date: "2026-08-05",
+      time: "10:00 AM",
+      location: "University of Ghana Campus, Accra",
+      host: "GreenHub Accra",
+      hostLogo: undefined,
+      volunteers: [],
+      maxVolunteers: 200,
+      imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
+    }
+  ];
+
+  const initialMarketplace: MarketplaceListing[] = [
+    {
+      id: "list-1",
+      title: "Sorted PET Bottles Bundle (approx. 50 pcs)",
+      description: "Clean, washed, and sorted PET water bottles, compressed and ready for shredding or product manufacturing.",
+      price: 15,
+      points: 150,
+      sellerId: "user-kwame",
+      sellerName: "Kwame Opoku",
+      sellerAvatar: undefined,
+      sellerRole: "User",
+      sector: "plastic",
+      quantity: 50,
+      imageUrl: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80",
+      dateListed: "2026-07-12",
+      status: "Available"
+    },
+    {
+      id: "list-2",
+      title: "Scrap Aluminium Cans (100 pcs)",
+      description: "Crushed beverage cans sorted by metal type, clean and dry. Ready for melting or scrap metal reprocessing.",
+      price: 35,
+      points: 350,
+      sellerId: "user-kwame",
+      sellerName: "Kwame Opoku",
+      sellerAvatar: undefined,
+      sellerRole: "User",
+      sector: "metal",
+      quantity: 100,
+      imageUrl: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=800&q=80",
+      dateListed: "2026-07-13",
+      status: "Available"
+    },
+    {
+      id: "list-3",
+      title: "Clean Cardboard boxes (medium size)",
+      description: "Flat packed cardboard shipping boxes, dry and tape removed. Ideal for packaging or paper mill pulping.",
+      price: 20,
+      points: 200,
+      sellerId: "user-ktu",
+      sellerName: "Koforidua Technical University",
+      sellerAvatar: undefined,
+      sellerRole: "User",
+      sector: "paper-cardboard",
+      quantity: 20,
+      imageUrl: "https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&q=80",
+      dateListed: "2026-07-14",
+      status: "Available"
+    }
+  ];
+
   return {
     user: null,
     users: [admin, sampleUser, sampleInst],
@@ -417,23 +682,31 @@ function getInitialState(): State {
     chats: initialChats,
     notifications: initialNotifications,
     auditLogs: initialAuditLogs,
+    posts: initialPosts,
+    challenges: initialChallenges,
+    events: initialEvents,
+    marketplace: initialMarketplace,
   };
 }
 
 function load(): State {
-  if (typeof window === "undefined") return { user: null, users: [], scans: [], pickups: [], chats: [], notifications: [], auditLogs: [] };
+  if (typeof window === "undefined") return { user: null, users: [], scans: [], pickups: [], chats: [], notifications: [], auditLogs: [], posts: [], challenges: [], events: [], marketplace: [] };
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
-        user: parsed.user || null,
-        users: (parsed.users || []).map((u: any) => ({ accountStatus: "Active", ...u })),
+        user: parsed.user ? { ...parsed.user, role: parsed.user.id === "admin-system" ? "Admin" : "User" } : null,
+        users: (parsed.users || []).map((u: any) => ({ ...u, accountStatus: u.accountStatus || "Active", role: u.id === "admin-system" ? "Admin" : "User" })),
         scans: parsed.scans || [],
         pickups: parsed.pickups || [],
         chats: parsed.chats || [],
         notifications: parsed.notifications || [],
         auditLogs: parsed.auditLogs || [],
+        posts: parsed.posts || [],
+        challenges: parsed.challenges || [],
+        events: parsed.events || [],
+        marketplace: parsed.marketplace || [],
       };
     }
   } catch {}
@@ -479,11 +752,12 @@ export const store = {
     save();
   },
 
-  signIn(email: string, password: string) {
-    const u = state.users.find((u) => u.email === email && u.password === password);
-    if (!u) throw new Error("Invalid email or password.");
-    const { password: _p, ...pub } = u;
-    state = { ...state, user: pub };
+  signIn(email: string, password?: string) {
+    const u = state.users.find(u => u.email === email && (!password || u.password === password));
+    if (!u) throw new Error("Invalid email or password");
+    // Ensure role sanitization applies even if in-memory state was stale
+    const sanitizedUser = { ...u, role: (u.id === "admin-system" ? "Admin" : "User") as "Admin"|"User" };
+    state = { ...state, user: sanitizedUser };
     save();
   },
 
@@ -980,6 +1254,283 @@ export const store = {
       ...state,
       auditLogs: [newLog, ...state.auditLogs],
     };
+  },
+
+  createPost(text: string, sector?: string, mediaUrl?: string, mediaType?: "image" | "video", visibility: CommunityPost["visibility"] = "Public") {
+    if (!state.user) return;
+    const isInst = state.user.accountType === "Institutional";
+    const badges = isInst 
+      ? ["🏢 Institutional Partner", "🏆 Sustainability Ambassador"]
+      : ["🌱 Green Starter"];
+
+    const newPost: CommunityPost = {
+      id: `post-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      userId: state.user.id,
+      userName: state.user.fullName,
+      userAvatar: state.user.avatar,
+      userRole: state.user.role,
+      userBadges: badges,
+      timestamp: new Date().toISOString(),
+      sector,
+      text,
+      mediaUrl,
+      mediaType,
+      likes: [],
+      helpful: [],
+      niceWork: [],
+      comments: [],
+      reported: false,
+      reportsCount: 0,
+      visibility
+    };
+
+    // Add points for posting
+    const updatedUser = { ...state.user, points: state.user.points + 10 };
+
+    state = {
+      ...state,
+      posts: [newPost, ...state.posts],
+      user: updatedUser,
+      users: state.users.map((u) => (u.id === updatedUser.id ? { ...u, points: updatedUser.points } : u))
+    };
+    this.addAuditLog("Created community post");
+    save();
+  },
+
+  likePost(postId: string) {
+    if (!state.user) return;
+    const userId = state.user.id;
+    state = {
+      ...state,
+      posts: state.posts.map((p) => {
+        if (p.id !== postId) return p;
+        const liked = p.likes.includes(userId);
+        return {
+          ...p,
+          likes: liked ? p.likes.filter((id) => id !== userId) : [...p.likes, userId]
+        };
+      })
+    };
+    save();
+  },
+
+  reactToPost(postId: string, reactionType: "helpful" | "niceWork") {
+    if (!state.user) return;
+    const userId = state.user.id;
+    state = {
+      ...state,
+      posts: state.posts.map((p) => {
+        if (p.id !== postId) return p;
+        const arr = reactionType === "helpful" ? p.helpful : p.niceWork;
+        const active = arr.includes(userId);
+        const updated = active ? arr.filter((id) => id !== userId) : [...arr, userId];
+        return {
+          ...p,
+          [reactionType]: updated
+        };
+      })
+    };
+    save();
+  },
+
+  addComment(postId: string, text: string) {
+    if (!state.user) return;
+    const newComment: CommunityComment = {
+      id: `comment-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      postId,
+      userId: state.user.id,
+      userName: state.user.fullName,
+      userAvatar: state.user.avatar,
+      userRole: state.user.role,
+      text,
+      timestamp: new Date().toISOString()
+    };
+
+    state = {
+      ...state,
+      posts: state.posts.map((p) => {
+        if (p.id !== postId) return p;
+        return {
+          ...p,
+          comments: [...p.comments, newComment]
+        };
+      })
+    };
+    save();
+  },
+
+  reportPost(postId: string) {
+    state = {
+      ...state,
+      posts: state.posts.map((p) => {
+        if (p.id !== postId) return p;
+        return {
+          ...p,
+          reported: true,
+          reportsCount: p.reportsCount + 1
+        };
+      })
+    };
+    save();
+  },
+
+  joinEvent(eventId: string) {
+    if (!state.user) return;
+    const userId = state.user.id;
+    state = {
+      ...state,
+      events: state.events.map((e) => {
+        if (e.id !== eventId) return e;
+        if (e.volunteers.includes(userId)) return e;
+        return {
+          ...e,
+          volunteers: [...e.volunteers, userId]
+        };
+      })
+    };
+    save();
+  },
+
+  leaveEvent(eventId: string) {
+    if (!state.user) return;
+    const userId = state.user.id;
+    state = {
+      ...state,
+      events: state.events.map((e) => {
+        if (e.id !== eventId) return e;
+        return {
+          ...e,
+          volunteers: e.volunteers.filter((id) => id !== userId)
+        };
+      })
+    };
+    save();
+  },
+
+  createMarketplaceListing(title: string, description: string, price: number, points: number, sector: string, quantity: number, imageUrl?: string) {
+    if (!state.user) return;
+    const newListing: MarketplaceListing = {
+      id: `list-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      title,
+      description,
+      price,
+      points,
+      sellerId: state.user.id,
+      sellerName: state.user.fullName,
+      sellerAvatar: state.user.avatar,
+      sellerRole: state.user.role,
+      sector,
+      quantity,
+      imageUrl: imageUrl || "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80",
+      dateListed: new Date().toISOString().split("T")[0],
+      status: "Available"
+    };
+
+    state = {
+      ...state,
+      marketplace: [newListing, ...state.marketplace]
+    };
+    this.addAuditLog(`Listed marketplace material: ${title}`);
+    save();
+  },
+
+  buyMarketplaceItem(listingId: string) {
+    if (!state.user) return;
+    const buyer = state.user;
+    const item = state.marketplace.find((l) => l.id === listingId);
+    if (!item || item.status === "Sold") return;
+
+    if (buyer.points < item.points) {
+      throw new Error(`Insufficient eco points. You need ${item.points} pts but have ${buyer.points} pts.`);
+    }
+
+    // Deduct points from buyer
+    const updatedBuyer = { ...buyer, points: buyer.points - item.points };
+
+    state = {
+      ...state,
+      marketplace: state.marketplace.map((l) => (l.id === listingId ? { ...l, status: "Sold" as const } : l)),
+      user: updatedBuyer,
+      users: state.users.map((u) => {
+        if (u.id === updatedBuyer.id) return { ...u, points: updatedBuyer.points };
+        // Credit the seller points if they are in the user pool
+        if (u.id === item.sellerId) return { ...u, points: u.points + item.points };
+        return u;
+      })
+    };
+
+    this.addAuditLog(`Claimed marketplace item: ${item.title}`);
+    save();
+  },
+
+  adminResolveReport(postId: string, approve: boolean) {
+    if (approve) {
+      // Keep post, dismiss report
+      state = {
+        ...state,
+        posts: state.posts.map((p) => (p.id === postId ? { ...p, reported: false, reportsCount: 0 } : p))
+      };
+      this.addAuditLog(`Dismissed community post reports for post ${postId}`);
+    } else {
+      // Reject and delete post
+      state = {
+        ...state,
+        posts: state.posts.filter((p) => p.id !== postId)
+      };
+      this.addAuditLog(`Moderator deleted reported post ${postId}`);
+    }
+    save();
+  },
+
+  adminDeletePost(postId: string) {
+    state = {
+      ...state,
+      posts: state.posts.filter((p) => p.id !== postId)
+    };
+    this.addAuditLog(`Deleted community post ${postId}`);
+    save();
+  },
+
+  adminCreateChallenge(title: string, description: string, points: number, co2: number, targetQuantity: number, sector: string, daysRemaining: number) {
+    const newChallenge: CommunityChallenge = {
+      id: `challenge-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      title,
+      description,
+      points,
+      co2,
+      daysRemaining,
+      targetQuantity,
+      progress: 0,
+      completed: false,
+      sector
+    };
+    state = {
+      ...state,
+      challenges: [newChallenge, ...state.challenges]
+    };
+    this.addAuditLog(`Created challenge: ${title}`);
+    save();
+  },
+
+  adminCreateEvent(title: string, description: string, date: string, time: string, location: string, host: string, imageUrl?: string) {
+    const newEvent: CommunityEvent = {
+      id: `event-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      title,
+      description,
+      date,
+      time,
+      location,
+      host,
+      volunteers: [],
+      maxVolunteers: 100,
+      imageUrl: imageUrl || "https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&q=80"
+    };
+    state = {
+      ...state,
+      events: [newEvent, ...state.events]
+    };
+    this.addAuditLog(`Created event: ${title}`);
+    save();
   },
 };
 
