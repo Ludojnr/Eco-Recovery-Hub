@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageContainer } from "@/components/layout";
 import { sectors } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Leaf, Shield } from "lucide-react";
+import { ArrowRight, Leaf, Shield, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/sectors")({
   head: () => ({ meta: [{ title: "Recovery Sectors — Eco-Recovery Hub" }] }),
@@ -75,6 +75,66 @@ function SectorsList() {
             </div>
           </div>
         ))}
+
+        {/* ── Organic Waste — Coming Soon (display only, not interactive) ── */}
+        <div className="surface-card overflow-hidden flex flex-col opacity-80 relative border-dashed border-2 border-eco/30 shadow-sm">
+          {/* Coming Soon badge */}
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 rounded-full bg-amber-500/90 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-white shadow-md">
+            <Clock className="h-3 w-3" />
+            Coming Soon
+          </div>
+
+          {/* Image header with greyed overlay */}
+          <div className="relative h-48 overflow-hidden bg-muted">
+            <img
+              src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&q=80"
+              alt="Organic Waste"
+              className="h-full w-full object-cover grayscale-[40%] brightness-75"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+            {/* Diagonal stripe pattern overlay for "locked" feel */}
+            <div
+              className="absolute inset-0 opacity-10"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)",
+                backgroundSize: "8px 8px",
+              }}
+            />
+            <div className="absolute bottom-4 left-4 flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md border border-white/20 text-xl text-white">
+                🌿
+              </span>
+              <h3 className="font-display font-bold text-lg text-white drop-shadow-sm">
+                Organic Waste
+              </h3>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 p-5 flex flex-col justify-between">
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Composting, food waste, agricultural by-products and garden waste converted into biogas, compost and soil amendments.
+              </p>
+              <div className="rounded-xl bg-muted/50 border border-border p-3.5 text-xs text-muted-foreground">
+                <div className="font-semibold text-foreground mb-1">Common Items:</div>
+                Food scraps, fruit peels, vegetable waste, yard clippings, eggshells, coffee grounds, agricultural waste.
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-muted-foreground tracking-wide uppercase flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-amber-500" /> In Development
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium bg-muted text-muted-foreground cursor-not-allowed select-none">
+                Guide <ArrowRight className="ml-1 h-3 w-3 opacity-40" />
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* ── End Organic Waste ── */}
       </div>
 
       {/* Info Callout */}
@@ -95,3 +155,4 @@ function SectorsList() {
     </PageContainer>
   );
 }
+
