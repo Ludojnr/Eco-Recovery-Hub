@@ -1,5 +1,7 @@
-// Mock auth + app store (persisted in localStorage)
+// App store: persisted to the backend API (Postgres) with localStorage as an
+// instant offline cache. Falls back to local-only mode when VITE_API_URL is unset.
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { apiEnabled, fetchRemoteState, scheduleRemoteSave } from "./api-sync";
 
 export type KycStatus = "Not Started" | "Pending" | "Verified" | "Rejected";
 
@@ -689,26 +691,29 @@ function getInitialState(): State {
   };
 }
 
+const EMPTY_STATE: State = { user: null, users: [], scans: [], pickups: [], chats: [], notifications: [], auditLogs: [], posts: [], challenges: [], events: [], marketplace: [] };
+
+function normalize(parsed: any): State {
+  return {
+    user: parsed.user ? { ...parsed.user, role: parsed.user.id === "admin-system" ? "Admin" : "User" } : null,
+    users: (parsed.users || []).map((u: any) => ({ ...u, accountStatus: u.accountStatus || "Active", role: u.id === "admin-system" ? "Admin" : "User" })),
+    scans: parsed.scans || [],
+    pickups: parsed.pickups || [],
+    chats: parsed.chats || [],
+    notifications: parsed.notifications || [],
+    auditLogs: parsed.auditLogs || [],
+    posts: parsed.posts || [],
+    challenges: parsed.challenges || [],
+    events: parsed.events || [],
+    marketplace: parsed.marketplace || [],
+  };
+}
+
 function load(): State {
-  if (typeof window === "undefined") return { user: null, users: [], scans: [], pickups: [], chats: [], notifications: [], auditLogs: [], posts: [], challenges: [], events: [], marketplace: [] };
+  if (typeof window === "undefined") return EMPTY_STATE;
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
-        user: parsed.user ? { ...parsed.user, role: parsed.user.id === "admin-system" ? "Admin" : "User" } : null,
-        users: (parsed.users || []).map((u: any) => ({ ...u, accountStatus: u.accountStatus || "Active", role: u.id === "admin-system" ? "Admin" : "User" })),
-        scans: parsed.scans || [],
-        pickups: parsed.pickups || [],
-        chats: parsed.chats || [],
-        notifications: parsed.notifications || [],
-        auditLogs: parsed.auditLogs || [],
-        posts: parsed.posts || [],
-        challenges: parsed.challenges || [],
-        events: parsed.events || [],
-        marketplace: parsed.marketplace || [],
-      };
-    }
+    if (raw) return normalize(JSON.parse(raw));
   } catch {}
   return getInitialState();
 }
@@ -717,8 +722,28 @@ let state: State = load();
 const listeners = new Set<() => void>();
 
 function save() {
-  if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(state));
+  if (typeof window !== "undefined") {
+    localStorage.setItem(KEY, JSON.stringify(state));
+    scheduleRemoteSave(state);
+  }
   listeners.forEach((l) => l());
+}
+
+// On the client, hydrate from the backend (source of truth). If the workspace
+// has no server record yet, seed it with the current local/initial state.
+async function hydrateFromServer() {
+  const remote = await fetchRemoteState<any>();
+  if (remote) {
+    state = normalize(remote);
+    if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(state));
+    listeners.forEach((l) => l());
+  } else {
+    scheduleRemoteSave(state);
+  }
+}
+
+if (typeof window !== "undefined" && apiEnabled()) {
+  hydrateFromServer();
 }
 
 export const store = {
