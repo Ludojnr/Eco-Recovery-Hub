@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useMemo } from 'react'
-import { useStore } from '../lib/mock-store'
+import { useSyncExternalStore, useState, useMemo } from 'react'
+import { store } from '../lib/mock-store'
 import { MapPin, Users, Award, Calendar, ExternalLink, Image as ImageIcon, Heart, MessageCircle, Share2, Target, Leaf } from 'lucide-react'
 
 export const Route = createFileRoute('/institutions/$instId')({
@@ -9,8 +9,8 @@ export const Route = createFileRoute('/institutions/$instId')({
 
 function InstitutionRoute() {
   const { instId } = Route.useParams()
-  const store = useStore()
-  const { users, posts, events, challenges } = store
+  const storeState = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
+  const { users, posts, events, challenges } = storeState
   
   const institution = users.find(u => u.id === instId && u.accountType === 'Institutional')
   

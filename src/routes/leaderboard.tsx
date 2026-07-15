@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useMemo } from 'react'
+import { useSyncExternalStore, useState, useMemo } from 'react'
 import { Trophy, Medal, Award, Search, TrendingUp, Users, Star, Activity, Camera, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
-import { useStore, User } from '../lib/mock-store'
+import { store, User } from '../lib/mock-store'
 
 export const Route = createFileRoute('/leaderboard')({
   component: LeaderboardRoute,
@@ -11,8 +11,9 @@ type TimeFilter = 'weekly' | 'monthly' | 'all-time'
 type CategoryFilter = 'points' | 'institutions' | 'helpfulness' | 'uploads' | 'ai-scans'
 
 function LeaderboardRoute() {
-  const store = useStore()
-  const { users, currentUser } = store
+  const storeState = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
+  const users = storeState.users
+  const currentUser = storeState.user
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('weekly')
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('points')
