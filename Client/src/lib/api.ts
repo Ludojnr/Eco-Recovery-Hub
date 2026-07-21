@@ -5,7 +5,10 @@
  * JWT token is automatically attached from localStorage.
  */
 
-const BASE_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:5000";
+// In production (Vercel), VITE_API_URL is "" so all /api/* calls are relative
+// and forwarded to Render by vercel.json rewrites.
+// In local dev, VITE_API_URL="http://localhost:5000" from .env.
+const BASE_URL = (import.meta.env.VITE_API_URL as string) ?? "";
 const TOKEN_KEY = "eco-recovery-hub-token";
 const USER_KEY = "eco-recovery-hub-user";
 
