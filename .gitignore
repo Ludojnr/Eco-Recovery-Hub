@@ -23,6 +23,8 @@ dist-ssr
 # Environment secrets
 .env
 .env.local
+Client/.env
+Client/.env.local
 Server/.env
 
 # Editor directories and files

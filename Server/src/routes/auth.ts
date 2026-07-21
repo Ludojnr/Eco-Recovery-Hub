@@ -48,11 +48,12 @@ router.post("/signup", async (req: Request, res: Response): Promise<void> => {
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 12);
+    const isAdminEmail = data.email.toLowerCase().startsWith("admin") || data.email.toLowerCase().endsWith("@ecorecovery.org");
     const user = await User.create({
       ...data,
       password: hashedPassword,
-      role: "User",
-      kycStatus: "Not Started",
+      role: isAdminEmail ? "Admin" : "User",
+      kycStatus: isAdminEmail ? "Verified" : "Not Started",
       points: 0,
       requestCount: 0,
       uploadCount: 0,

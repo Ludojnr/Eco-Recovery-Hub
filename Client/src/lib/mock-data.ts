@@ -137,11 +137,7 @@ export const sectorMaterials: {
   { id: "mat-10", sector: "all", title: "Mixed recyclables", icon: "♻️", description: "Household recovery across multiple streams." },
 ];
 
-export const pickupRequests = [
-  { id: "1", item: "Used Lenovo Laptop", sector: "e-waste", status: "Pending Review", address: "23 Koforidua Road, Accra", date: "2026-06-22", points: 150, quantity: 1, preferredDate: "2026-06-28" },
-  { id: "2", item: "PET bottles bundle", sector: "plastic", status: "Pickup Scheduled", address: "15 Kwame Nkrumah Ave, Kumasi", date: "2026-06-18", points: 60, quantity: 24, preferredDate: "2026-06-25" },
-  { id: "3", item: "Aluminium cans", sector: "metal", status: "Completed", address: "4 Cape Coast Rd, Takoradi", date: "2026-06-10", points: 45, quantity: 32, preferredDate: "2026-06-12" },
-];
+export const pickupRequests = [];
 
 export const tradeInPrices: Record<string, { low: number; high: number }> = {
   "Smartphone (working)": { low: 400, high: 2500 },

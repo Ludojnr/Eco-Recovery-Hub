@@ -55,18 +55,6 @@ function Login() {
         <div className="text-center text-sm text-muted-foreground">
           No account? <Link to="/auth/signup" className="text-leaf font-medium hover:underline">Create one</Link>
         </div>
-        
-        <div className="text-xs border border-dashed border-border rounded-lg p-3 bg-muted/30 text-muted-foreground mt-4 space-y-1">
-          <div className="font-semibold text-foreground text-center"> Demo Credentials:</div>
-          <div className="flex justify-between">
-            <span>Admin:</span>
-            <span className="font-mono text-foreground font-semibold">admin@ecorecovery.org / admin123</span>
-          </div>
-          <div className="flex justify-between">
-            <span>User:</span>
-            <span className="font-mono text-foreground font-semibold">kwame@gmail.com / password123</span>
-          </div>
-        </div>
 
         <SocialDivider />
         <div className="grid grid-cols-2 gap-2">
