@@ -18,6 +18,7 @@ type Upload = {
   url: string;
   result?: (typeof aiDetections)[number];
   scanning: boolean;
+  itemDesc: string; // user-provided description of the item
 };
 
 function classify(file: File): (typeof aiDetections)[number] {
@@ -31,8 +32,12 @@ function classify(file: File): (typeof aiDetections)[number] {
     [/phone|laptop|board|cable|charger|tv|battery|electronic/, "e-waste"],
   ];
   const matched = map.find(([re]) => re.test(name))?.[1];
-  const pool = matched ? aiDetections.filter((d) => d.sector === matched) : aiDetections;
-  return pool[Math.floor(Math.random() * pool.length)];
+  // Use the e-waste category as a safe default when filename gives no hint
+  const pool = matched
+    ? aiDetections.filter((d) => d.sector === matched)
+    : aiDetections.filter((d) => d.sector === "e-waste");
+  // Pick the highest-confidence item deterministically (no random)
+  return pool.reduce((best, cur) => (cur.confidence > best.confidence ? cur : best), pool[0]);
 }
 
 function Scanner() {
@@ -61,12 +66,16 @@ function Scanner() {
       file,
       url: URL.createObjectURL(file),
       scanning: true,
+      itemDesc: "",
     }));
     setUploads((prev) => [...created, ...prev]);
     created.forEach((u) => {
+      // Simulate analysis delay then assign deterministic classification
       setTimeout(() => {
-        setUploads((prev) => prev.map((p) => (p.id === u.id ? { ...p, scanning: false, result: classify(u.file) } : p)));
-      }, 1400 + Math.random() * 800);
+        setUploads((prev) =>
+          prev.map((p) => (p.id === u.id ? { ...p, scanning: false, result: classify(u.file) } : p))
+        );
+      }, 1200 + Math.random() * 600);
     });
   };
 
@@ -230,27 +239,43 @@ function Scanner() {
           ) : (
             <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {uploads.map((u) => (
-                <ScanCard key={u.id} upload={u} onRemove={() => remove(u.id)} />
+                <ScanCard
+                  key={u.id}
+                  upload={u}
+                  onRemove={() => remove(u.id)}
+                  onDescChange={(desc) =>
+                    setUploads((prev) =>
+                      prev.map((p) => (p.id === u.id ? { ...p, itemDesc: desc } : p))
+                    )
+                  }
+                />
               ))}
             </div>
           )}
         </div>
 
         {uploads.some((u) => u.result) && (
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex items-center justify-between flex-wrap gap-3">
+            <p className="text-xs text-muted-foreground">
+              💡 Tip: Edit item names in the cards below before submitting.
+            </p>
             <Button
+              id="submit-scans-btn"
               onClick={() => {
                 const scannedResults = uploads.filter((u) => u.result);
                 scannedResults.forEach((u) => {
                   if (u.result) {
                     store.addScan({
-                      item: u.result.item,
+                      // Use user-provided description as item name if filled in
+                      item: u.itemDesc.trim() || u.result.item,
                       sector: u.result.sector,
                       category: u.result.category,
                       confidence: u.result.confidence,
                       points: u.result.points,
                       co2: u.result.co2,
-                      description: u.result.description,
+                      description: u.itemDesc.trim()
+                        ? `${u.itemDesc.trim()} — ${u.result.description}`
+                        : u.result.description,
                       handling: u.result.handling,
                       imageUrl: u.url,
                     });
@@ -284,7 +309,15 @@ function Scanner() {
   );
 }
 
-function ScanCard({ upload, onRemove }: { upload: Upload; onRemove: () => void }) {
+function ScanCard({
+  upload,
+  onRemove,
+  onDescChange,
+}: {
+  upload: Upload;
+  onRemove: () => void;
+  onDescChange: (desc: string) => void;
+}) {
   const r = upload.result;
   const sector = r ? sectors.find((s) => s.id === r.sector) : null;
   return (
@@ -317,8 +350,19 @@ function ScanCard({ upload, onRemove }: { upload: Upload; onRemove: () => void }
               </span>
               <span className="text-[11px] rounded-full bg-muted px-2 py-1 font-medium">{Math.round(r.confidence * 100)}% match</span>
             </div>
-            <div className="mt-2 font-display text-lg font-semibold">{r.item}</div>
+            <div className="mt-2 font-display text-base font-semibold">{r.item}</div>
             <div className="text-xs text-muted-foreground">{r.category}</div>
+            {/* User-editable item name */}
+            <div className="mt-3">
+              <label className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wide">What is this item? (optional)</label>
+              <input
+                type="text"
+                value={upload.itemDesc}
+                onChange={(e) => onDescChange(e.target.value)}
+                placeholder={r.item}
+                className="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
             <p className="mt-2 text-sm">{r.description}</p>
             <div className="mt-3 rounded-lg bg-muted p-3 text-xs">
               <div className="font-semibold mb-0.5">Handling</div>

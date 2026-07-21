@@ -33,59 +33,66 @@ export async function seedDatabase() {
       console.log("✅  Admin user pre-seeded (admin@ecorecovery.org / password123)");
     }
 
-    // 1b. Seed institutional test accounts
-    const institutionalCount = await User.countDocuments({ accountType: "Institutional" });
-    if (institutionalCount === 0) {
-      console.log("🌱  Seeding institutional test accounts...");
-      const hashedPw = await bcrypt.hash("password123", 12);
-      await User.create([
-        {
-          fullName: "KTU Green Office",
-          email: "ktu@ecorecovery.org",
-          password: hashedPw,
-          phone: "+233 34 202 5000",
-          institution: "Koforidua Technical University",
-          location: "Koforidua, Eastern Region",
-          role: "User",
-          kycStatus: "Verified",
-          points: 1200,
-          requestCount: 4,
-          uploadCount: 12,
-          preferredPickupAddresses: ["Koforidua Technical University, Koforidua"],
-          accountStatus: "Active",
-          accountType: "Institutional",
-          orgName: "Koforidua Technical University",
-          orgType: "University",
-          orgLocation: "Koforidua, Eastern Region, Ghana",
-          contactPerson: "Dr. Ama Osei",
-          orgEmail: "greenoffice@ktu.edu.gh",
-          orgPhone: "+233 34 202 5001",
-        },
-        {
-          fullName: "GreenCorp Ghana",
-          email: "greencorp@ecorecovery.org",
-          password: hashedPw,
-          phone: "+233 30 277 8900",
-          institution: "GreenCorp Ghana Ltd",
-          location: "Accra, Greater Accra",
-          role: "User",
-          kycStatus: "Verified",
-          points: 3400,
-          requestCount: 9,
-          uploadCount: 28,
-          preferredPickupAddresses: ["1 Ring Road Central, Accra"],
-          accountStatus: "Active",
-          accountType: "Institutional",
-          orgName: "GreenCorp Ghana Ltd",
-          orgType: "Private Company",
-          orgLocation: "1 Ring Road Central, Accra, Ghana",
-          contactPerson: "Mr. Kofi Amponsah",
-          orgEmail: "info@greencorpgh.com",
-          orgPhone: "+233 30 277 8901",
-        },
-      ]);
-      console.log("✅  Institutional test accounts seeded (ktu@ecorecovery.org, greencorp@ecorecovery.org / password123)");
-    }
+    // 1b. Seed / reset institutional test accounts
+    // Uses upsert so existing accounts in the live DB are also reset to clean state
+    console.log("🌱  Ensuring institutional test accounts exist with clean data...");
+    const hashedPw = await bcrypt.hash("password123", 12);
+
+    const ktuData = {
+      fullName: "KTU Green Office",
+      password: hashedPw,
+      phone: "+233 34 202 5000",
+      institution: "Koforidua Technical University",
+      location: "Koforidua, Eastern Region",
+      role: "User",
+      kycStatus: "Verified",
+      points: 0,
+      requestCount: 0,
+      uploadCount: 0,
+      preferredPickupAddresses: ["Koforidua Technical University, Koforidua"],
+      accountStatus: "Active",
+      accountType: "Institutional",
+      orgName: "Koforidua Technical University",
+      orgType: "University",
+      orgLocation: "Koforidua, Eastern Region, Ghana",
+      contactPerson: "Dr. Ama Osei",
+      orgEmail: "greenoffice@ktu.edu.gh",
+      orgPhone: "+233 34 202 5001",
+    };
+
+    const gcData = {
+      fullName: "GreenCorp Ghana",
+      password: hashedPw,
+      phone: "+233 30 277 8900",
+      institution: "GreenCorp Ghana Ltd",
+      location: "Accra, Greater Accra",
+      role: "User",
+      kycStatus: "Verified",
+      points: 0,
+      requestCount: 0,
+      uploadCount: 0,
+      preferredPickupAddresses: ["1 Ring Road Central, Accra"],
+      accountStatus: "Active",
+      accountType: "Institutional",
+      orgName: "GreenCorp Ghana Ltd",
+      orgType: "Private Company",
+      orgLocation: "1 Ring Road Central, Accra, Ghana",
+      contactPerson: "Mr. Kofi Amponsah",
+      orgEmail: "info@greencorpgh.com",
+      orgPhone: "+233 30 277 8901",
+    };
+
+    await User.findOneAndUpdate(
+      { email: "ktu@ecorecovery.org" },
+      { $set: ktuData, $setOnInsert: { email: "ktu@ecorecovery.org" } },
+      { upsert: true, new: true }
+    );
+    await User.findOneAndUpdate(
+      { email: "greencorp@ecorecovery.org" },
+      { $set: gcData, $setOnInsert: { email: "greencorp@ecorecovery.org" } },
+      { upsert: true, new: true }
+    );
+    console.log("✅  Institutional accounts ready with 0 points (ktu@ecorecovery.org, greencorp@ecorecovery.org / password123)");
 
     // 2. Seed Challenges
     const challengeCount = await CommunityChallenge.countDocuments();

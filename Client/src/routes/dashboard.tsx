@@ -81,10 +81,10 @@ function UserDashboard({ user, snap }: { user: any; snap: any }) {
   
   const totalCo2Saved = Number(dynamicCo2.toFixed(1));
 
-  // Determine leaderboard rank (Kwame is pre-seeded at #33, KTU at #15, new users default to #100)
-  let userRank = 100;
-  if (user.id === "user-kwame") userRank = 33;
-  else if (user.id === "user-ktu") userRank = 15;
+  // Compute real leaderboard rank from live user data sorted by points
+  const sortedByPoints = [...snap.users].sort((a: any, b: any) => b.points - a.points);
+  const rankIndex = sortedByPoints.findIndex((u: any) => u.id === user.id);
+  const userRank = rankIndex >= 0 ? rankIndex + 1 : sortedByPoints.length + 1;
 
   const cards = [
     { label: "Eco Points Balance", value: `${user.points.toLocaleString()} pts`, icon: Award, accent: "text-leaf" },
