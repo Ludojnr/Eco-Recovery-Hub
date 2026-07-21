@@ -21,7 +21,7 @@ import {
   Users,
   ShoppingBag,
 } from "lucide-react";
-import { useHydrated, useUser, signOut } from "@/lib/mock-store";
+import { useHydrated, useUser, store, signOut } from "@/lib/mock-store";
 import { useTheme } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import {

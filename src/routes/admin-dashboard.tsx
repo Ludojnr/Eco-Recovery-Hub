@@ -1691,6 +1691,69 @@ function AdminAnalyticsPanel({ snap }: { snap: any }) {
 }
 
 // ------------------------------------------------------------------
+// TAB: COMMUNITY MANAGEMENT
+// ------------------------------------------------------------------
+function AdminCommunityManagement({ snap, globalSearch }: { snap: any; globalSearch: string }) {
+  const reportedPosts = snap.communityPosts.filter((p: any) => p.reported);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-display text-xl font-bold">Community & Moderation Hub</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">Moderate flagged user posts, oversee environmental campaigns and events.</p>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="surface-card p-4 rounded-xl border border-border">
+          <div className="text-xs text-muted-foreground font-semibold">Total Posts</div>
+          <div className="text-2xl font-bold font-display mt-1">{snap.communityPosts.length}</div>
+        </div>
+        <div className="surface-card p-4 rounded-xl border border-border">
+          <div className="text-xs text-muted-foreground font-semibold">Flagged / Reported</div>
+          <div className="text-2xl font-bold font-display mt-1 text-destructive">{reportedPosts.length}</div>
+        </div>
+        <div className="surface-card p-4 rounded-xl border border-border">
+          <div className="text-xs text-muted-foreground font-semibold">Active Challenges</div>
+          <div className="text-2xl font-bold font-display mt-1 text-leaf">{snap.communityChallenges.length}</div>
+        </div>
+      </div>
+
+      {/* Moderation Queue */}
+      <div className="surface-card p-5 rounded-xl border border-border space-y-4">
+        <h3 className="font-bold text-sm">Flagged Posts Queue ({reportedPosts.length})</h3>
+        {reportedPosts.length === 0 ? (
+          <div className="text-xs text-muted-foreground py-6 text-center">No posts currently flagged for moderation.</div>
+        ) : (
+          <div className="space-y-3">
+            {reportedPosts.map((post: any) => (
+              <div key={post.id} className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-semibold text-foreground">{post.userName}</span>
+                    <span className="text-muted-foreground">• {post.sector || "General"}</span>
+                    <span className="text-destructive font-semibold">({post.reportsCount || 1} reports)</span>
+                  </div>
+                  <p className="text-sm text-foreground">{post.text}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button size="sm" variant="outline" className="text-xs text-leaf hover:bg-leaf/10" onClick={() => store.resolvePostReport(post.id, true)}>
+                    Dismiss Report
+                  </Button>
+                  <Button size="sm" variant="destructive" className="text-xs" onClick={() => store.resolvePostReport(post.id, false)}>
+                    Remove Post
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------
 // TAB 12: AUDIT LOGS
 // ------------------------------------------------------------------
 function AdminAuditLogs({ snap }: { snap: any }) {

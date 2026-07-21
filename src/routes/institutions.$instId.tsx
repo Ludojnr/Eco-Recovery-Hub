@@ -17,9 +17,9 @@ function InstitutionRoute() {
   const [activeTab, setActiveTab] = useState<'overview' | 'posts' | 'campaigns' | 'events'>('overview')
 
   // Derived data for the institution
-  const instPosts = useMemo(() => posts.filter(p => p.authorId === instId), [posts, instId])
-  const instEvents = useMemo(() => events.filter(e => e.organizerId === instId), [events, instId])
-  const instChallenges = useMemo(() => challenges.filter(c => c.sponsorId === instId), [challenges, instId])
+  const instPosts = useMemo(() => posts.filter(p => p.userId === instId || p.userName === institution?.orgName || p.userName === institution?.fullName), [posts, instId, institution])
+  const instEvents = useMemo(() => events.filter(e => e.host === institution?.orgName || e.host === institution?.fullName), [events, institution])
+  const instChallenges = useMemo(() => challenges, [challenges])
   
   // Mock followers based on points
   const followersCount = institution ? Math.floor(institution.points * 0.1) : 0
@@ -197,21 +197,21 @@ function InstitutionRoute() {
                         <img src={institution.avatar} className="w-10 h-10 rounded-full object-cover" alt="" />
                         <div>
                           <div className="font-semibold text-gray-900 text-sm">{institution.orgName}</div>
-                          <div className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleDateString()}</div>
+                          <div className="text-xs text-gray-500">{new Date(post.timestamp).toLocaleDateString()}</div>
                         </div>
                       </div>
-                      <p className="text-gray-800 mb-4 whitespace-pre-wrap">{post.content}</p>
-                      {post.mediaUrls && post.mediaUrls.length > 0 && (
-                        <img src={post.mediaUrls[0]} className="w-full h-64 object-cover rounded-xl mb-4" alt="Post media" />
+                      <p className="text-gray-800 mb-4 whitespace-pre-wrap">{post.text}</p>
+                      {post.mediaUrl && (
+                        <img src={post.mediaUrl} className="w-full h-64 object-cover rounded-xl mb-4" alt="Post media" />
                       )}
                       <div className="flex items-center gap-6 pt-3 border-t border-gray-100">
                         <button className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors">
                           <Heart className="w-5 h-5" />
-                          <span className="text-sm font-medium">{post.likesCount}</span>
+                          <span className="text-sm font-medium">{post.likes.length}</span>
                         </button>
                         <button className="flex items-center gap-2 text-gray-500 hover:text-emerald-500 transition-colors">
                           <MessageCircle className="w-5 h-5" />
-                          <span className="text-sm font-medium">{post.commentsCount}</span>
+                          <span className="text-sm font-medium">{post.comments.length}</span>
                         </button>
                         <button className="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition-colors ml-auto">
                           <Share2 className="w-5 h-5" />
@@ -233,16 +233,16 @@ function InstitutionRoute() {
                   instChallenges.map(challenge => (
                     <div key={challenge.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden">
                       <div className="absolute top-0 right-0 bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-bl-lg">
-                        {challenge.status}
+                        {challenge.completed ? 'Completed' : 'Active'}
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 mb-2 mt-2">{challenge.title}</h3>
                       <p className="text-gray-600 mb-4 line-clamp-2">{challenge.description}</p>
                       <div className="flex flex-wrap gap-4 text-sm mb-5">
                         <div className="bg-gray-50 px-3 py-1.5 rounded-lg font-medium text-gray-700 flex items-center gap-2">
-                          <Target className="w-4 h-4 text-emerald-500" /> Goal: {challenge.targetMetric}
+                          <Target className="w-4 h-4 text-emerald-500" /> Goal: {challenge.targetQuantity} units
                         </div>
                         <div className="bg-gray-50 px-3 py-1.5 rounded-lg font-medium text-gray-700 flex items-center gap-2">
-                          <Award className="w-4 h-4 text-yellow-500" /> Reward: {challenge.rewardPoints} pts
+                          <Award className="w-4 h-4 text-yellow-500" /> Reward: {challenge.points} pts
                         </div>
                       </div>
                       <button className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-2.5 rounded-xl transition-colors">
@@ -263,14 +263,14 @@ function InstitutionRoute() {
                 ) : (
                   instEvents.map(evt => (
                     <div key={evt.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-5">
-                      <img src={evt.imageUrl} alt={evt.title} className="w-full sm:w-32 h-32 object-cover rounded-xl shrink-0" />
+                      <img src={evt.imageUrl || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&q=80"} alt={evt.title} className="w-full sm:w-32 h-32 object-cover rounded-xl shrink-0" />
                       <div className="flex-1">
                         <h3 className="font-bold text-lg text-gray-900 mb-1">{evt.title}</h3>
                         <p className="text-gray-500 text-sm mb-3 line-clamp-2">{evt.description}</p>
                         <div className="flex items-center gap-4 text-xs font-medium text-gray-500 mb-4">
-                          <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {new Date(evt.startDate).toLocaleDateString()}</span>
+                          <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {evt.date}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {evt.location}</span>
-                          <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {evt.participantsCount}/{evt.maxParticipants}</span>
+                          <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {evt.volunteers.length}/{evt.maxVolunteers || 100}</span>
                         </div>
                         <Link to="/events" className="text-emerald-600 font-medium text-sm hover:underline">
                           View Event Details &rarr;

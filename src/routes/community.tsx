@@ -31,7 +31,8 @@ import {
   ShoppingBag,
   Flame,
   ShieldCheck,
-  Flag
+  Flag,
+  X
 } from "lucide-react";
 
 export const Route = createFileRoute("/community")({

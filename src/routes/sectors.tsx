@@ -3,6 +3,7 @@ import { PageContainer } from "@/components/layout";
 import { sectors } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Leaf, Shield, Clock } from "lucide-react";
+import organicImg from "../orgnic waste.jpg";
 
 export const Route = createFileRoute("/sectors")({
   head: () => ({ meta: [{ title: "Recovery Sectors — Eco-Recovery Hub" }] }),
@@ -87,7 +88,7 @@ function SectorsList() {
           {/* Image header with greyed overlay */}
           <div className="relative h-48 overflow-hidden bg-muted">
             <img
-              src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&q=80"
+              src={organicImg}
               alt="Organic Waste"
               className="h-full w-full object-cover grayscale-[40%] brightness-75"
               loading="lazy"

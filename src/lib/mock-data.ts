@@ -65,6 +65,13 @@ export const articles = [
   { id: "4", title: "What Pickup Day Looks Like", category: "Guide", time: "3 min read", excerpt: "Prepare your devices, label cables, and meet your collector with confidence." },
 ];
 
+import eWasteImg from "../E waste   sector.jpg";
+import plasticImg from "../plastics.jpg";
+import metalImg from "../metal.jpg";
+import glassImg from "../glass sector.jpg";
+import paperImg from "../paper and cardboard.jpg";
+import textileImg from "../clothing and textiles sector.jpg";
+
 export type SectorId = "e-waste" | "plastic" | "metal" | "glass" | "paper-cardboard" | "textile";
 
 export const sectors: {
@@ -76,12 +83,12 @@ export const sectors: {
   examples: string;
   detail: string;
 }[] = [
-  { id: "e-waste", name: "E-Waste / Electronics", icon: "🔌", photo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80", short: "Recover value from old electronics and safely handle hazardous components.", examples: "Circuit boards, motherboards, phones, chargers, laptops, cables, small appliances.", detail: "Upload devices like phones, computers and chargers. We classify hazardous electronics and match them to certified recovery routes." },
-  { id: "plastic", name: "Plastic", icon: "🧴", photo: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=600&q=80", short: "Sort household and packaging plastics by polymer type for clean recycling.", examples: "PET bottles, HDPE containers, plastic packaging, household plastics.", detail: "Submit plastic bottles, containers and packaging. We guide you to the correct polymer stream for reuse or industrial recovery." },
-  { id: "metal", name: "Metal / Recovery Materials", icon: "🥫", photo: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80", short: "Aluminum, steel and scrap metals recovered for smelting and reuse.", examples: "Cans, scrap metal, metal parts, household metal waste, device housings.", detail: "Capture metal items and components. Our platform routes them through recycling partners for maximum material recovery." },
-  { id: "glass", name: "Glass", icon: "🍾", photo: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80", short: "Clean glass streams turned into new bottles and containers.", examples: "Bottles, jars, glass containers, reusable and recyclable glass materials.", detail: "Upload glass containers and bottles to keep them in the circular economy rather than landfill." },
-  { id: "paper-cardboard", name: "Paper & Cardboard", icon: "📦", photo: "https://images.unsplash.com/photo-1553413077-190dd305871c?w=600&q=80", short: "Fibre-based packaging recovered into new paper products.", examples: "Cartons, paper packaging, cardboard boxes, office paper.", detail: "Submit paper and cardboard materials for pulping and reuse in new packaging and stationery." },
-  { id: "textile", name: "Clothing & Textiles", icon: "👕", photo: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80", short: "Recycle and reuse textiles, garments, leather, and fabric materials to divert them from landfills.", examples: "Shirts, Trousers, Dresses, Jackets, Shoes, Bags, Uniforms, Curtains, Bedsheets, Towels, Fabric offcuts, Leather products, Denim, Cotton, Polyester, Mixed textiles.", detail: "Donate wearable clothing and shoes for reuse, or submit worn textiles, leather products, fabric offcuts and polyester materials for fibre recovery and recycling." },
+  { id: "e-waste", name: "E-Waste / Electronics", icon: "🔌", photo: eWasteImg, short: "Recover value from old electronics and safely handle hazardous components.", examples: "Circuit boards, motherboards, phones, chargers, laptops, cables, small appliances.", detail: "Upload devices like phones, computers and chargers. We classify hazardous electronics and match them to certified recovery routes." },
+  { id: "plastic", name: "Plastic", icon: "🧴", photo: plasticImg, short: "Sort household and packaging plastics by polymer type for clean recycling.", examples: "PET bottles, HDPE containers, plastic packaging, household plastics.", detail: "Submit plastic bottles, containers and packaging. We guide you to the correct polymer stream for reuse or industrial recovery." },
+  { id: "metal", name: "Metal / Recovery Materials", icon: "🥫", photo: metalImg, short: "Aluminum, steel and scrap metals recovered for smelting and reuse.", examples: "Cans, scrap metal, metal parts, household metal waste, device housings.", detail: "Capture metal items and components. Our platform routes them through recycling partners for maximum material recovery." },
+  { id: "glass", name: "Glass", icon: "🍾", photo: glassImg, short: "Clean glass streams turned into new bottles and containers.", examples: "Bottles, jars, glass containers, reusable and recyclable glass materials.", detail: "Upload glass containers and bottles to keep them in the circular economy rather than landfill." },
+  { id: "paper-cardboard", name: "Paper & Cardboard", icon: "📦", photo: paperImg, short: "Fibre-based packaging recovered into new paper products.", examples: "Cartons, paper packaging, cardboard boxes, office paper.", detail: "Submit paper and cardboard materials for pulping and reuse in new packaging and stationery." },
+  { id: "textile", name: "Clothing & Textiles", icon: "👕", photo: textileImg, short: "Recycle and reuse textiles, garments, leather, and fabric materials to divert them from landfills.", examples: "Shirts, Trousers, Dresses, Jackets, Shoes, Bags, Uniforms, Curtains, Bedsheets, Towels, Fabric offcuts, Leather products, Denim, Cotton, Polyester, Mixed textiles.", detail: "Donate wearable clothing and shoes for reuse, or submit worn textiles, leather products, fabric offcuts and polyester materials for fibre recovery and recycling." },
 ];
 
 export const aiDetections: {

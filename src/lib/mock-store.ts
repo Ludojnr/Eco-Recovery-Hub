@@ -239,6 +239,7 @@ function getInitialState(): State {
     requestCount: 2,
     uploadCount: 5,
     role: "User",
+    accountType: "Individual",
     orgName: "Koforidua Technical University",
     orgType: "University",
     orgLocation: "Koforidua",
@@ -781,13 +782,13 @@ export const store = {
     if (!state.user) return;
     const updated = {
       ...state.user,
-      kycStatus: "Pending",
+      kycStatus: "Pending" as const,
       kycMessage: "KYC documents submitted and awaiting review.",
     };
     state = {
       ...state,
       user: updated,
-      users: state.users.map((u) => (u.id === updated.id ? updated : u)),
+      users: state.users.map((u) => (u.id === updated.id ? { ...u, ...updated } : u)),
     };
     save();
   },
@@ -1167,18 +1168,6 @@ export const store = {
     save();
   },
 
-  rejectScan(scanId: string) {
-    const targetScan = state.scans.find((s) => s.id === scanId);
-    state = {
-      ...state,
-      scans: state.scans.map((s) => (s.id === scanId ? { ...s, status: "Rejected" as const } : s)),
-    };
-    if (targetScan) {
-      this.addAuditLog(`Rejected material scan`, targetScan.userName);
-    }
-    save();
-  },
-
   deleteScan(scanId: string) {
     const targetScan = state.scans.find((s) => s.id === scanId);
     state = {
@@ -1371,6 +1360,21 @@ export const store = {
         };
       })
     };
+    save();
+  },
+
+  resolvePostReport(postId: string, dismiss: boolean) {
+    if (dismiss) {
+      state = {
+        ...state,
+        posts: state.posts.map((p) => (p.id === postId ? { ...p, reported: false, reportsCount: 0 } : p))
+      };
+    } else {
+      state = {
+        ...state,
+        posts: state.posts.filter((p) => p.id !== postId)
+      };
+    }
     save();
   },
 
