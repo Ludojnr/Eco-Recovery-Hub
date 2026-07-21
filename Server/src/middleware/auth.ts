@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 export interface AuthRequest extends Request {
+  params: Record<string, string>;
+  body: any;
   user?: {
     id: string;
     role: "User" | "Admin";
