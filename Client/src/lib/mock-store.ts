@@ -424,7 +424,22 @@ if (typeof window !== "undefined") {
   setTimeout(() => {
     syncWithApi();
   }, 100);
+
+  // Auto-refresh every 30 seconds so all open devices/tabs stay up to date
+  setInterval(() => {
+    if (getToken()) {
+      syncWithApi();
+    }
+  }, 30_000);
+
+  // Also re-sync when the tab becomes visible again (user switches back)
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && getToken()) {
+      syncWithApi();
+    }
+  });
 }
+
 
 // ─── Store Actions ──────────────────────────────────────────────────────────
 
