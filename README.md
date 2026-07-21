@@ -76,7 +76,6 @@ VITE_API_URL=http://localhost:5000
 ```
 MONGO_URI=mongodb+srv://...
 JWT_SECRET=...
-PORT=5000
 FRONTEND_URL=http://localhost:5173
 NODE_ENV=development
 ```

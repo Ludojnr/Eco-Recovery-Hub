@@ -3,11 +3,6 @@
   "outputDirectory": ".output/public",
   "installCommand": "npm install",
   "framework": null,
-  "functions": {
-    ".output/server/index.mjs": {
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",

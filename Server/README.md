@@ -109,4 +109,6 @@ npm run dev
    - `FRONTEND_URL` — your Vercel deployment URL (e.g., `https://eco-recovery-hub.vercel.app`)
    - `NODE_ENV` — `production`
 
+   Note: Do not set `PORT` on Render; Render provides the correct port automatically.
+
 6. After deploy, copy the Render URL and set it as `VITE_API_URL` in your Vercel project settings.
