@@ -21,7 +21,7 @@ import {
   Users,
   ShoppingBag,
 } from "lucide-react";
-import { useHydrated, useUser, store } from "@/lib/mock-store";
+import { useHydrated, useUser, signOut } from "@/lib/mock-store";
 import { useTheme } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import {
@@ -178,7 +178,7 @@ export function Navbar() {
                   {theme === "light" ? <Moon className="mr-2 h-4 w-4" /> : <Sun className="mr-2 h-4 w-4" />}
                   {theme === "light" ? "Dark mode" : "Light mode"}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => store.signOut()} className="text-destructive focus:text-destructive">
+                <DropdownMenuItem onClick={() => signOut()} className="text-destructive focus:text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -245,7 +245,7 @@ export function Navbar() {
                 <Link to="/messages" onClick={() => setOpen(false)} className="flex justify-between items-center rounded-lg px-3 py-2 text-sm hover:bg-muted">
                   Messages {unreadMessages > 0 && <span className="rounded-full bg-leaf px-1.5 text-[10px] font-bold text-background">{unreadMessages}</span>}
                 </Link>
-                <button onClick={() => { store.signOut(); setOpen(false); }} className="rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-muted">Logout</button>
+                <button onClick={() => { signOut(); setOpen(false); }} className="rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-muted">Logout</button>
               </>
             )}
             {hydrated && !user && (

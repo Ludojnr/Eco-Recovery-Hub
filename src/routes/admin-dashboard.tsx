@@ -1,6 +1,6 @@
 import type * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useHydrated, store, useUser } from "@/lib/mock-store";
+import { useHydrated, store, useUser, signOut } from "@/lib/mock-store";
 import { useTheme } from "@/lib/theme";
 import { useState, useSyncExternalStore, useEffect } from "react";
 import {
@@ -124,7 +124,7 @@ function AdminDashboardLayout() {
   }, []);
 
   const handleLogout = () => {
-    store.signOut();
+    signOut();
     toast.success("Administrator logged out successfully.");
     navigate({ to: "/auth/login" });
   };

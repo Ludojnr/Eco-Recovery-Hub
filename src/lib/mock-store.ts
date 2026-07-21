@@ -1534,13 +1534,59 @@ export const store = {
   },
 };
 
-export function useUser() {
-  const s = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-  return s.user;
+/**
+ * useUser — reads from the API-authenticated user in localStorage first.
+ * Falls back to the in-memory mock store during migration.
+ */
+export function useUser(): (User & { id: string }) | null {
+  const [apiUser, setApiUser] = useState<(User & { id: string }) | null>(() => {
+    try {
+      const raw = localStorage.getItem("eco-recovery-hub-user");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // MongoDB uses _id; normalise to id
+        return { ...parsed, id: parsed._id || parsed.id };
+      }
+    } catch {}
+    return null;
+  });
+
+  useEffect(() => {
+    const handleStorage = () => {
+      try {
+        const raw = localStorage.getItem("eco-recovery-hub-user");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          setApiUser({ ...parsed, id: parsed._id || parsed.id });
+        } else {
+          setApiUser(null);
+        }
+      } catch {
+        setApiUser(null);
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  // Prefer API user; fall back to mock store user
+  const storeUser = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot).user;
+  return apiUser ?? storeUser;
 }
 
 export function useHydrated() {
   const [h, setH] = useState(false);
   useEffect(() => setH(true), []);
   return h;
+}
+
+/**
+ * signOut — clears both the JWT token and the in-memory store.
+ * Call this from any logout button.
+ */
+export function signOut() {
+  localStorage.removeItem("eco-recovery-hub-token");
+  localStorage.removeItem("eco-recovery-hub-user");
+  store.signOut();
 }

@@ -249,12 +249,12 @@ function CommunityPage() {
                     className="w-full h-8 rounded-lg border border-input bg-transparent px-2 text-xs"
                   >
                     <option value="">No Sector tag</option>
-                    <option value="e-waste">🔌 E-Waste</option>
-                    <option value="plastic">🧴 Plastic</option>
-                    <option value="metal">🥫 Metal</option>
-                    <option value="glass">🍾 Glass</option>
-                    <option value="paper-cardboard">📦 Paper & Cardboard</option>
-                    <option value="textile">👕 Clothing & Textiles</option>
+                    <option value="e-waste"> E-Waste</option>
+                    <option value="plastic">Plastic</option>
+                    <option value="metal"> Metal</option>
+                    <option value="glass"> Glass</option>
+                    <option value="paper-cardboard"> Paper & Cardboard</option>
+                    <option value="textile"> Clothing & Textiles</option>
                   </select>
                 </div>
 
@@ -265,10 +265,10 @@ function CommunityPage() {
                     onChange={(e) => setPostVisibility(e.target.value as any)}
                     className="w-full h-8 rounded-lg border border-input bg-transparent px-2 text-xs"
                   >
-                    <option value="Public">🌍 Public</option>
-                    <option value="Friends">👥 Friends</option>
-                    <option value="Institution Only">🏫 Campus / Institution</option>
-                    <option value="Private">🔒 Private (Just Me)</option>
+                    <option value="Public"> Public</option>
+                    <option value="Friends"> Friends</option>
+                    <option value="Institution Only"> Campus / Institution</option>
+                    <option value="Private">Private (Just Me)</option>
                   </select>
                 </div>
 
@@ -307,6 +307,7 @@ function CommunityPage() {
                 >
                   <Camera className="h-4 w-4 text-leaf" /> Photo
                 </button>
+                
                 <button
                   type="button"
                   onClick={() => setShowCreatorDetails(prev => !prev)}

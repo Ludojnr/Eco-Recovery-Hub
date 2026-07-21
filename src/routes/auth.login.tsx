@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { store } from "@/lib/mock-store";
+import { authApi, setToken } from "@/lib/api";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/login")({
@@ -18,22 +18,28 @@ function Login() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [remember, setRemember] = React.useState(true);
+  const [loading, setLoading] = React.useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      store.signIn(email, password);
-      toast.success("Welcome !");
-      const activeUser = store.getSnapshot().user;
-      if (activeUser && activeUser.role === "Admin") {
+      const { token, user } = await authApi.login(email, password);
+      setToken(token);
+      localStorage.setItem("eco-recovery-hub-user", JSON.stringify(user));
+      toast.success(`Welcome back, ${user.fullName}!`);
+      if (user.role === "Admin") {
         navigate({ to: "/admin-dashboard" });
       } else {
         navigate({ to: "/dashboard" });
       }
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to continue your recycling journey.">
@@ -45,7 +51,7 @@ function Login() {
             <Checkbox checked={remember} onCheckedChange={(v) => setRemember(!!v)} /> Remember me
           </label>
         </div>
-        <Button type="submit" className="w-full bg-eco-gradient text-eco-foreground">Sign in</Button>
+        <Button type="submit" disabled={loading} className="w-full bg-eco-gradient text-eco-foreground">{loading ? "Signing in…" : "Sign in"}</Button>
         <div className="text-center text-sm text-muted-foreground">
           No account? <Link to="/auth/signup" className="text-leaf font-medium hover:underline">Create one</Link>
         </div>

@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { store } from "@/lib/mock-store";
+import { authApi, setToken } from "@/lib/api";
 import { toast } from "sonner";
 import { AuthLayout, Field, SocialDivider } from "./auth.login";
 
@@ -14,6 +14,7 @@ export const Route = createFileRoute("/auth/signup")({
 function SignUp() {
   const navigate = useNavigate();
   const [accountType, setAccountType] = useState<"Individual" | "Institutional">("Individual");
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -35,43 +36,49 @@ function SignUp() {
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password.length < 6) return toast.error("Password must be at least 6 characters.");
     if (form.password !== form.confirm) return toast.error("Passwords do not match.");
     
+    setLoading(true);
     try {
-      if (accountType === "Individual") {
-        store.signUp({
-          fullName: form.fullName,
-          email: form.email,
-          phone: form.phone,
-          institution: form.institution || "None",
-          location: form.location,
-          password: form.password,
-          accountType: "Individual",
-        });
-      } else {
-        store.signUp({
-          fullName: form.contactPerson, // Principal identifier
-          email: form.orgEmail,
-          phone: form.orgPhone,
-          institution: form.orgName,
-          location: form.orgLocation,
-          password: form.password,
-          accountType: "Institutional",
-          orgName: form.orgName,
-          orgType: form.orgType,
-          orgLocation: form.orgLocation,
-          contactPerson: form.contactPerson,
-          orgEmail: form.orgEmail,
-          orgPhone: form.orgPhone,
-        });
-      }
+      const payload =
+        accountType === "Individual"
+          ? {
+              fullName: form.fullName,
+              email: form.email,
+              phone: form.phone,
+              institution: form.institution || "None",
+              location: form.location,
+              password: form.password,
+              accountType: "Individual" as const,
+            }
+          : {
+              fullName: form.contactPerson,
+              email: form.orgEmail,
+              phone: form.orgPhone,
+              institution: form.orgName,
+              location: form.orgLocation,
+              password: form.password,
+              accountType: "Institutional" as const,
+              orgName: form.orgName,
+              orgType: form.orgType,
+              orgLocation: form.orgLocation,
+              contactPerson: form.contactPerson,
+              orgEmail: form.orgEmail,
+              orgPhone: form.orgPhone,
+            };
+
+      const { token, user } = await authApi.signup(payload);
+      setToken(token);
+      localStorage.setItem("eco-recovery-hub-user", JSON.stringify(user));
       toast.success("Account created — welcome to Eco-Recovery-Hub!");
       navigate({ to: "/dashboard" });
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Signup failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -149,7 +156,7 @@ function SignUp() {
           <Field label="Password"><Input type="password" required value={form.password} onChange={set("password")} /></Field>
           <Field label="Confirm"><Input type="password" required value={form.confirm} onChange={set("confirm")} /></Field>
         </div>
-        <Button type="submit" className="w-full bg-eco-gradient text-eco-foreground">Create Account</Button>
+        <Button type="submit" disabled={loading} className="w-full bg-eco-gradient text-eco-foreground">{loading ? "Creating account…" : "Create Account"}</Button>
         <div className="text-center text-sm text-muted-foreground">
           Already a member? <Link to="/auth/login" className="text-leaf font-medium hover:underline">Sign in</Link>
         </div>
