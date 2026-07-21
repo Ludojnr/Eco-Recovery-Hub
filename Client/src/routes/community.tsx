@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageContainer, RequireUser } from "@/components/layout";
 import { store, useUser } from "@/lib/mock-store";
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +18,7 @@ import {
   Award,
   Leaf,
   Camera,
+  ImagePlus,
   MapPin,
   Tag,
   Globe,
@@ -59,6 +60,8 @@ function CommunityPage() {
   const [postMediaUrl, setPostMediaUrl] = useState<string | null>(null);
   const [postLocation, setPostLocation] = useState("");
   const [showCreatorDetails, setShowCreatorDetails] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   
   // Comment states
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
@@ -297,16 +300,53 @@ function CommunityPage() {
 
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
               <div className="flex items-center gap-1.5">
-                {/* Simulated Image Upload */}
+                {/* Real Camera Capture */}
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const url = URL.createObjectURL(file);
+                      setPostMediaUrl(url);
+                      toast.success("Photo captured!");
+                    }
+                    e.currentTarget.value = "";
+                  }}
+                />
+                {/* Gallery Upload */}
+                <input
+                  ref={galleryInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const url = URL.createObjectURL(file);
+                      setPostMediaUrl(url);
+                      toast.success("Photo attached!");
+                    }
+                    e.currentTarget.value = "";
+                  }}
+                />
                 <button
                   type="button"
-                  onClick={() => {
-                    setPostMediaUrl("https://images.unsplash.com/photo-1611270624018-c89493793674?w=800&q=80");
-                    toast.info("Simulated camera photo attachment");
-                  }}
+                  onClick={() => cameraInputRef.current?.click()}
                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted transition-colors"
                 >
-                  <Camera className="h-4 w-4 text-leaf" /> Photo
+                  <Camera className="h-4 w-4 text-leaf" /> Camera
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  <ImagePlus className="h-4 w-4 text-leaf" /> Photo
                 </button>
                 
                 <button

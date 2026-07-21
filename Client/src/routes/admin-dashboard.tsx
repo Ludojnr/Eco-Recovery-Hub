@@ -1694,7 +1694,16 @@ function AdminAnalyticsPanel({ snap }: { snap: any }) {
 // TAB: COMMUNITY MANAGEMENT
 // ------------------------------------------------------------------
 function AdminCommunityManagement({ snap, globalSearch }: { snap: any; globalSearch: string }) {
-  const reportedPosts = snap.communityPosts.filter((p: any) => p.reported);
+  const allPosts: any[] = snap.posts || [];
+  const allChallenges: any[] = snap.challenges || [];
+  const reportedPosts = allPosts.filter((p: any) => p.reported);
+
+  const filteredPosts = globalSearch
+    ? allPosts.filter((p: any) =>
+        p.text?.toLowerCase().includes(globalSearch.toLowerCase()) ||
+        p.userName?.toLowerCase().includes(globalSearch.toLowerCase())
+      )
+    : allPosts;
 
   return (
     <div className="space-y-6">
@@ -1705,40 +1714,40 @@ function AdminCommunityManagement({ snap, globalSearch }: { snap: any; globalSea
 
       {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="surface-card p-4 rounded-xl border border-border">
+        <div className="bg-card p-4 rounded-xl border border-border">
           <div className="text-xs text-muted-foreground font-semibold">Total Posts</div>
-          <div className="text-2xl font-bold font-display mt-1">{snap.communityPosts.length}</div>
+          <div className="text-2xl font-bold font-display mt-1">{allPosts.length}</div>
         </div>
-        <div className="surface-card p-4 rounded-xl border border-border">
+        <div className="bg-card p-4 rounded-xl border border-border">
           <div className="text-xs text-muted-foreground font-semibold">Flagged / Reported</div>
           <div className="text-2xl font-bold font-display mt-1 text-destructive">{reportedPosts.length}</div>
         </div>
-        <div className="surface-card p-4 rounded-xl border border-border">
+        <div className="bg-card p-4 rounded-xl border border-border">
           <div className="text-xs text-muted-foreground font-semibold">Active Challenges</div>
-          <div className="text-2xl font-bold font-display mt-1 text-leaf">{snap.communityChallenges.length}</div>
+          <div className="text-2xl font-bold font-display mt-1 text-leaf">{allChallenges.length}</div>
         </div>
       </div>
 
       {/* Moderation Queue */}
-      <div className="surface-card p-5 rounded-xl border border-border space-y-4">
-        <h3 className="font-bold text-sm">Flagged Posts Queue ({reportedPosts.length})</h3>
+      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+        <h3 className="font-bold text-sm">🚩 Flagged Posts Queue ({reportedPosts.length})</h3>
         {reportedPosts.length === 0 ? (
-          <div className="text-xs text-muted-foreground py-6 text-center">No posts currently flagged for moderation.</div>
+          <div className="text-xs text-muted-foreground py-6 text-center">✅ No posts currently flagged for moderation.</div>
         ) : (
           <div className="space-y-3">
             {reportedPosts.map((post: any) => (
-              <div key={post.id} className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <div className="space-y-1">
+              <div key={post.id} className="p-4 rounded-xl bg-destructive/5 border border-destructive/20 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2 text-xs">
                     <span className="font-semibold text-foreground">{post.userName}</span>
                     <span className="text-muted-foreground">• {post.sector || "General"}</span>
                     <span className="text-destructive font-semibold">({post.reportsCount || 1} reports)</span>
                   </div>
-                  <p className="text-sm text-foreground">{post.text}</p>
+                  <p className="text-sm text-foreground truncate max-w-md">{post.text}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Button size="sm" variant="outline" className="text-xs text-leaf hover:bg-leaf/10" onClick={() => store.resolvePostReport(post.id, true)}>
-                    Dismiss Report
+                    Dismiss
                   </Button>
                   <Button size="sm" variant="destructive" className="text-xs" onClick={() => store.resolvePostReport(post.id, false)}>
                     Remove Post
@@ -1749,6 +1758,106 @@ function AdminCommunityManagement({ snap, globalSearch }: { snap: any; globalSea
           </div>
         )}
       </div>
+
+      {/* All Posts Feed */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <h3 className="font-bold text-sm">All Community Posts ({filteredPosts.length})</h3>
+        </div>
+        {filteredPosts.length === 0 ? (
+          <div className="p-8 text-center text-xs text-muted-foreground">No community posts yet.</div>
+        ) : (
+          <table className="w-full text-xs text-left">
+            <thead className="bg-muted text-muted-foreground uppercase font-bold border-b border-border">
+              <tr>
+                <th className="p-3">Author</th>
+                <th className="p-3">Post Content</th>
+                <th className="p-3">Sector</th>
+                <th className="p-3">Engagement</th>
+                <th className="p-3">Status</th>
+                <th className="p-3 text-right">Operations</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPosts.map((p: any) => (
+                <tr key={p.id} className={`border-b border-border hover:bg-muted/30 transition-colors ${p.reported ? "bg-destructive/5" : ""}`}>
+                  <td className="p-3">
+                    <div className="font-semibold text-foreground">{p.userName}</div>
+                    <div className="text-[10px] text-muted-foreground">{p.userRole}</div>
+                  </td>
+                  <td className="p-3 max-w-[250px]">
+                    <p className="truncate text-foreground">{p.text}</p>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">{p.visibility}</div>
+                  </td>
+                  <td className="p-3">
+                    {p.sector ? (
+                      <span className="px-2 py-0.5 rounded-full bg-eco-soft text-leaf text-[10px] font-semibold uppercase">{p.sector}</span>
+                    ) : <span className="text-muted-foreground">—</span>}
+                  </td>
+                  <td className="p-3">
+                    <div className="text-muted-foreground">
+                      👍 {p.likes?.length || 0} · 💬 {p.comments?.length || 0}
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    {p.reported ? (
+                      <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-destructive/10 text-destructive">Reported</span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-leaf/10 text-leaf">Active</span>
+                    )}
+                  </td>
+                  <td className="p-3 text-right">
+                    <div className="flex gap-1.5 justify-end">
+                      {p.reported && (
+                        <Button size="xs" variant="outline" className="text-leaf hover:bg-leaf/10 text-[10px]" onClick={() => store.resolvePostReport(p.id, true)}>
+                          Clear Flag
+                        </Button>
+                      )}
+                      <Button size="xs" variant="ghost" className="text-destructive hover:bg-destructive/10 text-[10px]" onClick={() => { store.resolvePostReport(p.id, false); toast.error("Post removed."); }}>
+                        Delete
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Active Challenges */}
+      {allChallenges.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+          <h3 className="font-bold text-sm">🔥 Active Challenges ({allChallenges.length})</h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {allChallenges.map((c: any) => {
+              const percent = Math.min(100, Math.round((c.progress / c.targetQuantity) * 100));
+              return (
+                <div key={c.id} className="p-4 rounded-xl border border-border bg-muted/20 space-y-2 text-xs">
+                  <div className="flex justify-between items-start">
+                    <span className="font-bold text-foreground truncate max-w-[140px]">{c.title}</span>
+                    <span className="text-leaf bg-eco-soft px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">+{c.points} pts</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">{c.description}</p>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[9px] text-muted-foreground">
+                      <span>Progress: {c.progress}/{c.targetQuantity}</span>
+                      <span>{percent}%</span>
+                    </div>
+                    <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-eco-gradient h-full rounded-full" style={{ width: `${percent}%` }} />
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-[9px] text-muted-foreground border-t border-border/40 pt-1">
+                    <span className="capitalize">Sector: {c.sector}</span>
+                    <span>{c.daysRemaining} days left</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
