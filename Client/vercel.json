@@ -13,10 +13,7 @@
       "source": "/api/(.*)",
       "destination": "https://eco-recovery-hub-server.onrender.com/api/$1"
     },
-    {
-      "source": "/(.*)",
-      "destination": "/.output/server/index.mjs"
-    }
+
   ],
   "headers": [
     {
