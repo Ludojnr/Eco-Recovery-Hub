@@ -1,5 +1,32 @@
-// Mock auth + app store (persisted in localStorage)
+// React-compatible state store bridged to Express.js backend API
 import { useEffect, useState, useSyncExternalStore } from "react";
+import {
+  getToken,
+  setToken,
+  clearToken,
+  authApi,
+  usersApi,
+  scansApi,
+  pickupsApi,
+  chatsApi,
+  notificationsApi,
+  auditLogsApi,
+  communityApi,
+  marketplaceApi,
+  ApiUser,
+  ApiScan,
+  ApiPickup,
+  ApiNotification,
+  ApiAuditLog,
+  ApiPost,
+  ApiChallenge,
+  ApiEvent,
+  ApiListing,
+  ApiChat,
+  ApiComment,
+} from "./api";
+
+// ─── Type definitions (fully compatible with existing route files) ──────────
 
 export type KycStatus = "Not Started" | "Pending" | "Verified" | "Rejected";
 
@@ -22,8 +49,6 @@ export type User = {
   role: "User" | "Admin";
   memberSince: string;
   accountStatus?: "Active" | "Suspended";
-  
-  // Institutional identification fields
   accountType: "Individual" | "Institutional";
   orgName?: string;
   orgType?: string;
@@ -93,7 +118,7 @@ export type ChatMessage = {
 };
 
 export type ChatConversation = {
-  id: string; // Typically user ID
+  id: string;
   userId: string;
   userName: string;
   userEmail: string;
@@ -137,11 +162,12 @@ export type CommunityPost = {
   text: string;
   mediaUrl?: string;
   mediaType?: "image" | "video";
-  likes: string[]; // userIds
-  helpful: string[]; // userIds
-  niceWork: string[]; // userIds
+  likes: string[];
+  helpful: string[];
+  niceWork: string[];
   comments: CommunityComment[];
   reported: boolean;
+  reportedCount?: number; // compat
   reportsCount: number;
   visibility: "Public" | "Friends" | "Institution Only" | "Private";
 };
@@ -168,7 +194,7 @@ export type CommunityEvent = {
   location: string;
   host: string;
   hostLogo?: string;
-  volunteers: string[]; // userIds
+  volunteers: string[];
   maxVolunteers?: number;
   imageUrl?: string;
 };
@@ -192,7 +218,7 @@ export type MarketplaceListing = {
 
 type State = {
   user: User | null;
-  users: Array<User & { password: string }>;
+  users: User[];
   scans: ScannedMaterial[];
   pickups: PickupRequest[];
   chats: ChatConversation[];
@@ -204,7 +230,95 @@ type State = {
   marketplace: MarketplaceListing[];
 };
 
-const KEY = "eco-recovery-hub-state-v3";
+// ─── Data conversion / mapping helpers ──────────────────────────────────────
+
+function convertUser(u: ApiUser): User {
+  return {
+    ...u,
+    id: u._id || (u as any).id,
+    memberSince: u.memberSince ? new Date(u.memberSince).toISOString() : new Date().toISOString(),
+  };
+}
+
+function convertScan(s: ApiScan): ScannedMaterial {
+  return {
+    ...s,
+    id: s._id || (s as any).id,
+  };
+}
+
+function convertPickup(p: ApiPickup): PickupRequest {
+  return {
+    ...p,
+    id: p._id || (p as any).id,
+  };
+}
+
+function convertNotification(n: ApiNotification): AppNotification {
+  return {
+    ...n,
+    id: n._id || (n as any).id,
+  };
+}
+
+function convertAuditLog(l: ApiAuditLog): AuditLog {
+  return {
+    ...l,
+    id: l._id || (l as any).id,
+  };
+}
+
+function convertComment(c: ApiComment): CommunityComment {
+  return {
+    ...c,
+    id: c._id || (c as any).id,
+    timestamp: c.timestamp ? new Date(c.timestamp).toISOString() : new Date().toISOString(),
+  };
+}
+
+function convertPost(p: ApiPost): CommunityPost {
+  return {
+    ...p,
+    id: p._id || (p as any).id,
+    timestamp: p.timestamp ? new Date(p.timestamp).toISOString() : new Date().toISOString(),
+    comments: (p.comments || []).map(convertComment),
+  };
+}
+
+function convertChallenge(c: ApiChallenge): CommunityChallenge {
+  return {
+    ...c,
+    id: c._id || (c as any).id,
+  };
+}
+
+function convertEvent(e: ApiEvent): CommunityEvent {
+  return {
+    ...e,
+    id: e._id || (e as any).id,
+  };
+}
+
+function convertListing(l: ApiListing): MarketplaceListing {
+  return {
+    ...l,
+    id: l._id || (l as any).id,
+  };
+}
+
+function convertChat(c: ApiChat): ChatConversation {
+  return {
+    ...c,
+    id: c._id || (c as any).id,
+    messages: (c.messages || []).map((m: any) => ({
+      ...m,
+      id: m._id || m.id,
+      timestamp: m.timestamp ? new Date(m.timestamp).toISOString() : new Date().toISOString(),
+    })),
+  };
+}
+
+// ─── Reactive Client Store ──────────────────────────────────────────────────
 
 function getInitialState(): State {
   return {
@@ -222,870 +336,330 @@ function getInitialState(): State {
   };
 }
 
-function load(): State {
-  if (typeof window === "undefined") return { user: null, users: [], scans: [], pickups: [], chats: [], notifications: [], auditLogs: [], posts: [], challenges: [], events: [], marketplace: [] };
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
-        user: parsed.user ? { ...parsed.user, role: parsed.user.id === "admin-system" ? "Admin" : "User" } : null,
-        users: (parsed.users || []).map((u: any) => ({ ...u, accountStatus: u.accountStatus || "Active", role: u.id === "admin-system" ? "Admin" : "User" })),
-        scans: parsed.scans || [],
-        pickups: parsed.pickups || [],
-        chats: parsed.chats || [],
-        notifications: parsed.notifications || [],
-        auditLogs: parsed.auditLogs || [],
-        posts: parsed.posts || [],
-        challenges: parsed.challenges || [],
-        events: parsed.events || [],
-        marketplace: parsed.marketplace || [],
-      };
-    }
-  } catch {}
-  return getInitialState();
-}
-
-let state: State = load();
+let state: State = getInitialState();
 const listeners = new Set<() => void>();
 
 function save() {
-  if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(state));
   listeners.forEach((l) => l());
 }
+
+let isSyncing = false;
+
+export async function syncWithApi() {
+  if (isSyncing) return;
+  const token = getToken();
+  if (!token) {
+    state = getInitialState();
+    save();
+    return;
+  }
+
+  isSyncing = true;
+  try {
+    const currentUser = await authApi.me();
+    
+    // Fetch collections concurrently
+    const [
+      scans,
+      pickups,
+      posts,
+      challenges,
+      events,
+      marketplace,
+      notifications,
+      leaderboardUsers,
+    ] = await Promise.all([
+      scansApi.list().catch(() => []),
+      pickupsApi.list().catch(() => []),
+      communityApi.listPosts().catch(() => []),
+      communityApi.listChallenges().catch(() => []),
+      communityApi.listEvents().catch(() => []),
+      marketplaceApi.list().catch(() => []),
+      notificationsApi.list().catch(() => []),
+      usersApi.leaderboard().catch(() => []),
+    ]);
+
+    let allUsers: ApiUser[] = leaderboardUsers;
+    let auditLogs: ApiAuditLog[] = [];
+    let chats: ApiChat[] = [];
+
+    const isAdmin = currentUser.role === "Admin";
+    if (isAdmin) {
+      const [fullUsers, fetchedAuditLogs, fetchedChats] = await Promise.all([
+        usersApi.list().catch(() => []),
+        auditLogsApi.list().catch(() => []),
+        chatsApi.list().catch(() => []),
+      ]);
+      allUsers = fullUsers;
+      auditLogs = fetchedAuditLogs;
+      chats = fetchedChats;
+    } else {
+      const chat = await chatsApi.getConversation(currentUser._id).catch(() => null);
+      chats = chat ? [chat] : [];
+    }
+
+    state = {
+      user: convertUser(currentUser),
+      users: allUsers.map(convertUser),
+      scans: scans.map(convertScan),
+      pickups: pickups.map(convertPickup),
+      chats: chats.map(convertChat),
+      notifications: notifications.map(convertNotification),
+      auditLogs: auditLogs.map(convertAuditLog),
+      posts: posts.map(convertPost),
+      challenges: challenges.map(convertChallenge),
+      events: events.map(convertEvent),
+      marketplace: marketplace.map(convertListing),
+    };
+    save();
+  } catch (err) {
+    console.error("API sync error:", err);
+  } finally {
+    isSyncing = false;
+  }
+}
+
+// Automatically sync when the file loads
+if (typeof window !== "undefined") {
+  setTimeout(() => {
+    syncWithApi();
+  }, 100);
+}
+
+// ─── Store Actions ──────────────────────────────────────────────────────────
 
 export const store = {
   subscribe(l: () => void) {
     listeners.add(l);
     return () => listeners.delete(l);
   },
-  
+
   getSnapshot: () => state,
 
-  signUp(input: Omit<User, "id" | "memberSince" | "preferredPickupAddresses" | "kycStatus" | "kycMessage" | "points" | "requestCount" | "uploadCount" | "role"> & { password: string }) {
-    if (state.users.find((u) => u.email === input.email)) {
-      throw new Error("An account with this email already exists.");
+  async signUp(input: any) {
+    const { token, user } = await authApi.signup(input);
+    setToken(token);
+    localStorage.setItem("eco-recovery-hub-user", JSON.stringify(user));
+    await syncWithApi();
+  },
+
+  async signIn(email: string, password?: string) {
+    if (!password) {
+      await syncWithApi();
+      return;
     }
-    
-    const user: User & { password: string } = {
-      ...input,
-      preferredPickupAddresses: [],
-      kycStatus: "Not Started",
-      kycMessage: undefined,
-      points: 0,
-      requestCount: 0,
-      uploadCount: 0,
-      role: "User",
-      accountStatus: "Active",
-      id: crypto.randomUUID(),
-      memberSince: new Date().toISOString(),
-    };
-    
-    state = { ...state, users: [...state.users, user], user };
+    const { token, user } = await authApi.login(email, password);
+    setToken(token);
+    localStorage.setItem("eco-recovery-hub-user", JSON.stringify(user));
+    await syncWithApi();
+  },
+
+  async signOut() {
+    clearToken();
+    state = getInitialState();
     save();
   },
 
-  signIn(email: string, password?: string) {
-    const u = state.users.find(u => u.email === email && (!password || u.password === password));
-    if (!u) throw new Error("Invalid email or password");
-    // Ensure role sanitization applies even if in-memory state was stale
-    const sanitizedUser = { ...u, role: (u.id === "admin-system" ? "Admin" : "User") as "Admin"|"User" };
-    state = { ...state, user: sanitizedUser };
-    save();
+  async updateProfile(patch: Partial<User>) {
+    await authApi.updateProfile(patch);
+    await syncWithApi();
   },
 
-  signOut() {
-    state = { ...state, user: null };
-    save();
+  async submitKyc() {
+    await authApi.submitKyc();
+    await syncWithApi();
   },
 
-  updateProfile(patch: Partial<User>) {
-    if (!state.user) return;
-    const updated = { ...state.user, ...patch };
-    state = {
-      ...state,
-      user: updated,
-      users: state.users.map((u) => (u.id === updated.id ? { ...u, ...patch } : u)),
-    };
-    save();
+  async approveKyc(userId: string) {
+    await usersApi.approveKyc(userId);
+    await syncWithApi();
   },
 
-  submitKyc() {
-    if (!state.user) return;
-    const updated = {
-      ...state.user,
-      kycStatus: "Pending" as const,
-      kycMessage: "KYC documents submitted and awaiting review.",
-    };
-    state = {
-      ...state,
-      user: updated,
-      users: state.users.map((u) => (u.id === updated.id ? { ...u, ...updated } : u)),
-    };
-    save();
+  async rejectKyc(userId: string, feedback: string) {
+    await usersApi.rejectKyc(userId, feedback);
+    await syncWithApi();
   },
 
-
-
-  // Admin: KYC approval workflows
-  approveKyc(userId: string) {
-    const userToVerify = state.users.find((u) => u.id === userId);
-    if (!userToVerify) return;
-
-    state = {
-      ...state,
-      users: state.users.map((u) => (u.id === userId ? { ...u, kycStatus: "Verified", kycMessage: "Verified successfully!" } : u)),
-      notifications: [
-        {
-          id: crypto.randomUUID(),
-          userId,
-          type: "system",
-          title: "Profile Verified",
-          body: "Your KYC document submission has been approved and verified.",
-          time: "Just now",
-          unread: true,
-        },
-        ...state.notifications,
-      ],
-      user: state.user && state.user.id === userId ? { ...state.user, kycStatus: "Verified", kycMessage: "Verified successfully!" } : state.user,
-    };
-    save();
+  async addScan(scan: any) {
+    await scansApi.create(scan);
+    await syncWithApi();
   },
 
-  rejectKyc(userId: string, feedback: string) {
-    const userToVerify = state.users.find((u) => u.id === userId);
-    if (!userToVerify) return;
-
-    state = {
-      ...state,
-      users: state.users.map((u) => (u.id === userId ? { ...u, kycStatus: "Rejected", kycMessage: feedback } : u)),
-      notifications: [
-        {
-          id: crypto.randomUUID(),
-          userId,
-          type: "system",
-          title: "KYC Submission Rejected",
-          body: `Rejection details: ${feedback}`,
-          time: "Just now",
-          unread: true,
-        },
-        ...state.notifications,
-      ],
-      user: state.user && state.user.id === userId ? { ...state.user, kycStatus: "Rejected", kycMessage: feedback } : state.user,
-    };
-    save();
+  async approveScan(scanId: string) {
+    await scansApi.approve(scanId);
+    await syncWithApi();
   },
 
-  // Scanned material submissions
-  addScan(scan: Omit<ScannedMaterial, "id" | "userId" | "userEmail" | "userName" | "date" | "status">) {
-    if (!state.user) return;
-    const newScan: ScannedMaterial = {
-      ...scan,
-      id: `scan-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      userId: state.user.id,
-      userEmail: state.user.email,
-      userName: state.user.fullName,
-      status: "Pending Approval",
-      date: new Date().toISOString().split("T")[0],
-    };
-
-    state = {
-      ...state,
-      scans: [newScan, ...state.scans],
-      user: {
-        ...state.user,
-        uploadCount: state.user.uploadCount + 1,
-      },
-      users: state.users.map((u) => (u.id === state.user!.id ? { ...u, uploadCount: u.uploadCount + 1 } : u)),
-    };
-    save();
+  async rejectScan(scanId: string) {
+    await scansApi.reject(scanId);
+    await syncWithApi();
   },
 
-  approveScan(scanId: string) {
-    const scan = state.scans.find((s) => s.id === scanId);
-    if (!scan || scan.status !== "Pending Approval") return;
-
-    state = {
-      ...state,
-      scans: state.scans.map((s) => (s.id === scanId ? { ...s, status: "Approved" } : s)),
-      users: state.users.map((u) => {
-        if (u.id === scan.userId) {
-          return {
-            ...u,
-            points: u.points + scan.points,
-          };
-        }
-        return u;
-      }),
-      notifications: [
-        {
-          id: crypto.randomUUID(),
-          userId: scan.userId,
-          type: "reward",
-          title: `+${scan.points} Points Earned`,
-          body: `Your scan of "${scan.item}" was approved by the admin.`,
-          time: "Just now",
-          unread: true,
-        },
-        ...state.notifications,
-      ],
-      user: state.user && state.user.id === scan.userId ? { ...state.user, points: state.user.points + scan.points } : state.user,
-    };
-    save();
+  async addPickupRequest(pickup: any) {
+    await pickupsApi.create(pickup);
+    await syncWithApi();
   },
 
-  rejectScan(scanId: string) {
-    const scan = state.scans.find((s) => s.id === scanId);
-    if (!scan || scan.status !== "Pending Approval") return;
-
-    state = {
-      ...state,
-      scans: state.scans.map((s) => (s.id === scanId ? { ...s, status: "Rejected" } : s)),
-      notifications: [
-        {
-          id: crypto.randomUUID(),
-          userId: scan.userId,
-          type: "system",
-          title: "Scan Submission Rejected",
-          body: `Your material submission "${scan.item}" was rejected because it did not match quality guidelines.`,
-          time: "Just now",
-          unread: true,
-        },
-        ...state.notifications,
-      ],
-    };
-    save();
+  async updatePickupStatus(pickupId: string, nextStatus: any) {
+    await pickupsApi.updateStatus(pickupId, nextStatus);
+    await syncWithApi();
   },
 
-  // Pickup Requests
-  addPickupRequest(pickup: Omit<PickupRequest, "id" | "userId" | "userName" | "userEmail" | "date" | "status">) {
-    if (!state.user) return;
-    const newPickup: PickupRequest = {
-      ...pickup,
-      id: `pick-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      userId: state.user.id,
-      userName: state.user.fullName,
-      userEmail: state.user.email,
-      status: "Pending Review",
-      date: new Date().toISOString().split("T")[0],
-    };
-
-    state = {
-      ...state,
-      pickups: [newPickup, ...state.pickups],
-      user: {
-        ...state.user,
-        requestCount: state.user.requestCount + 1,
-      },
-      users: state.users.map((u) => (u.id === state.user!.id ? { ...u, requestCount: u.requestCount + 1 } : u)),
-    };
-    save();
+  async sendMessage(chatUserId: string, text: string, attachment?: any) {
+    await chatsApi.sendMessage(chatUserId, text, attachment);
+    await syncWithApi();
   },
 
-  updatePickupStatus(pickupId: string, nextStatus: PickupRequest["status"]) {
-    const pickup = state.pickups.find((p) => p.id === pickupId);
-    if (!pickup) return;
-
-    let pointsAwarded = 0;
-    if (nextStatus === "Completed" && pickup.status !== "Completed") {
-      pointsAwarded = pickup.points;
-    }
-
-    state = {
-      ...state,
-      pickups: state.pickups.map((p) => (p.id === pickupId ? { ...p, status: nextStatus } : p)),
-      users: state.users.map((u) => {
-        if (u.id === pickup.userId && pointsAwarded > 0) {
-          return { ...u, points: u.points + pointsAwarded };
-        }
-        return u;
-      }),
-      notifications: [
-        {
-          id: crypto.randomUUID(),
-          userId: pickup.userId,
-          type: "pickup",
-          title: `Pickup Request: ${nextStatus}`,
-          body: nextStatus === "Completed" 
-            ? `Your pickup for "${pickup.item}" was completed. +${pointsAwarded} points awarded!`
-            : `Your pickup for "${pickup.item}" status updated to "${nextStatus}".`,
-          time: "Just now",
-          unread: true,
-        },
-        ...state.notifications,
-      ],
-      user: state.user && state.user.id === pickup.userId && pointsAwarded > 0 
-        ? { ...state.user, points: state.user.points + pointsAwarded }
-        : state.user,
-    };
-    save();
+  async markChatResolved(chatUserId: string) {
+    await chatsApi.resolve(chatUserId);
+    await syncWithApi();
   },
 
-  // Chat / Messages
-  sendMessage(chatUserId: string, text: string, attachment?: { url: string; name: string; isImage: boolean }) {
-    if (!state.user) return;
-    const isSenderAdmin = state.user.role === "Admin";
-    const senderId = state.user.id;
-    const senderName = state.user.fullName;
-
-    const newMessage: ChatMessage = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      senderId,
-      senderName,
-      text,
-      timestamp: new Date().toISOString(),
-      fileUrl: attachment?.url,
-      fileName: attachment?.name,
-      isImage: attachment?.isImage,
-    };
-
-    let chat = state.chats.find((c) => c.userId === chatUserId);
-    if (!chat) {
-      // Find the user details to create a new chat
-      const chattingUser = state.users.find((u) => u.id === chatUserId);
-      chat = {
-        id: chatUserId,
-        userId: chatUserId,
-        userName: chattingUser?.fullName || "Anonymous User",
-        userEmail: chattingUser?.email || "",
-        status: "active",
-        unreadCount: 0,
-        adminUnreadCount: 0,
-        lastMessageAt: new Date().toISOString(),
-        messages: [],
-      };
-    }
-
-    const updatedChat: ChatConversation = {
-      ...chat,
-      status: "active",
-      lastMessageAt: new Date().toISOString(),
-      messages: [...chat.messages, newMessage],
-      unreadCount: isSenderAdmin ? chat.unreadCount + 1 : 0,
-      adminUnreadCount: isSenderAdmin ? 0 : chat.adminUnreadCount + 1,
-    };
-
-    state = {
-      ...state,
-      chats: [updatedChat, ...state.chats.filter((c) => c.userId !== chatUserId)],
-    };
-    save();
-
-    // Simulation trigger: if a normal user messages and admin is not actively replying,
-    // trigger a quick bot reply to demonstrate the "working prototype" nature of the chat.
-    if (!isSenderAdmin) {
-      setTimeout(() => {
-        // Fetch fresh state inside the timeout to ensure we don't clobber updates
-        const freshState = load();
-        const currentChat = freshState.chats.find((c) => c.userId === chatUserId);
-        if (currentChat && currentChat.messages[currentChat.messages.length - 1].senderId !== "admin-system") {
-          const autoReplies = [
-            "Thank you for contacting Eco-Recovery-Hub Support. An administrator has been notified of your message and will review your inquiry shortly.",
-            "Understood! We are currently checking our collection logs. Let us know if you need to add any detail about the location or materials.",
-            "Hello! Your message has been routed to our logistics queue. We will get back to you soon regarding your request."
-          ];
-          const botReplyText = autoReplies[Math.floor(Math.random() * autoReplies.length)];
-          const botMessage: ChatMessage = {
-            id: `msg-bot-${Date.now()}`,
-            senderId: "admin-system",
-            senderName: "Support Bot (Eco-Recovery-Hub)",
-            text: botReplyText,
-            timestamp: new Date().toISOString(),
-          };
-          
-          state = {
-            ...state,
-            chats: state.chats.map((c) => 
-              c.userId === chatUserId 
-                ? { ...c, messages: [...c.messages, botMessage], unreadCount: c.unreadCount + 1, lastMessageAt: new Date().toISOString() } 
-                : c
-            ),
-          };
-          save();
-        }
-      }, 3000);
-    }
+  async clearUnreadCount(chatUserId: string, _isAdmin: boolean) {
+    await chatsApi.clearUnread(chatUserId);
+    await syncWithApi();
   },
 
-  markChatResolved(chatUserId: string) {
-    state = {
-      ...state,
-      chats: state.chats.map((c) => (c.userId === chatUserId ? { ...c, status: "resolved" as const } : c)),
-    };
-    save();
+  async clearNotifications(_userId: string) {
+    await notificationsApi.clearAll();
+    await syncWithApi();
   },
 
-  clearUnreadCount(chatUserId: string, isAdmin: boolean) {
-    state = {
-      ...state,
-      chats: state.chats.map((c) => 
-        c.userId === chatUserId 
-          ? {
-              ...c,
-              unreadCount: isAdmin ? c.unreadCount : 0,
-              adminUnreadCount: isAdmin ? 0 : c.adminUnreadCount
-            }
-          : c
-      ),
-    };
-    save();
+  async suspendUser(userId: string) {
+    await usersApi.suspend(userId);
+    await syncWithApi();
   },
 
-  clearNotifications(userId: string) {
-    state = {
-      ...state,
-      notifications: state.notifications.map((n) => (n.userId === userId ? { ...n, unread: false } : n)),
-    };
-    save();
+  async reactivateUser(userId: string) {
+    await usersApi.reactivate(userId);
+    await syncWithApi();
   },
 
-  // Administrative Operations
-  suspendUser(userId: string) {
-    state = {
-      ...state,
-      users: state.users.map((u) => (u.id === userId ? { ...u, accountStatus: "Suspended" as const } : u)),
-    };
-    const targetUser = state.users.find((u) => u.id === userId);
-    this.addAuditLog(`Suspended user account`, targetUser?.fullName, targetUser?.orgName);
-    save();
+  async deleteUser(userId: string) {
+    await usersApi.delete(userId);
+    await syncWithApi();
   },
 
-  reactivateUser(userId: string) {
-    state = {
-      ...state,
-      users: state.users.map((u) => (u.id === userId ? { ...u, accountStatus: "Active" as const } : u)),
-    };
-    const targetUser = state.users.find((u) => u.id === userId);
-    this.addAuditLog(`Reactivated user account`, targetUser?.fullName, targetUser?.orgName);
-    save();
+  async verifyUser(userId: string) {
+    await usersApi.approveKyc(userId);
+    await syncWithApi();
   },
 
-  deleteUser(userId: string) {
-    const targetUser = state.users.find((u) => u.id === userId);
-    state = {
-      ...state,
-      users: state.users.filter((u) => u.id !== userId),
-      user: state.user && state.user.id === userId ? null : state.user,
-    };
-    this.addAuditLog(`Deleted user account`, targetUser?.fullName, targetUser?.orgName);
-    save();
+  async adjustUserPoints(userId: string, pointsChange: number, reason: string) {
+    await usersApi.adjustPoints(userId, pointsChange, reason);
+    await syncWithApi();
   },
 
-  verifyUser(userId: string) {
-    this.approveKyc(userId);
-    const targetUser = state.users.find((u) => u.id === userId);
-    this.addAuditLog(`Manually verified user`, targetUser?.fullName, targetUser?.orgName);
+  async deleteScan(scanId: string) {
+    await scansApi.delete(scanId);
+    await syncWithApi();
   },
 
-  adjustUserPoints(userId: string, pointsChange: number, reason: string) {
-    state = {
-      ...state,
-      users: state.users.map((u) => (u.id === userId ? { ...u, points: Math.max(0, u.points + pointsChange) } : u)),
-      user: state.user && state.user.id === userId ? { ...state.user, points: Math.max(0, state.user.points + pointsChange) } : state.user,
-      notifications: [
-        {
-          id: crypto.randomUUID(),
-          userId,
-          type: "reward",
-          title: pointsChange >= 0 ? `Points Added: +${pointsChange}` : `Points Deducted: ${pointsChange}`,
-          body: `Reason: ${reason}`,
-          time: "Just now",
-          unread: true,
-        },
-        ...state.notifications,
-      ],
-    };
-    const targetUser = state.users.find((u) => u.id === userId);
-    this.addAuditLog(`Adjusted points by ${pointsChange} (${reason})`, targetUser?.fullName, targetUser?.orgName);
-    save();
+  async editScan(scanId: string, patch: any) {
+    await scansApi.update(scanId, patch);
+    await syncWithApi();
   },
 
-  deleteScan(scanId: string) {
-    const targetScan = state.scans.find((s) => s.id === scanId);
-    state = {
-      ...state,
-      scans: state.scans.filter((s) => s.id !== scanId),
-    };
-    if (targetScan) {
-      this.addAuditLog(`Deleted material upload`, targetScan.userName);
-    }
-    save();
+  async assignPickupDriver(pickupId: string, driverName: string) {
+    await pickupsApi.assignDriver(pickupId, driverName);
+    await syncWithApi();
   },
 
-  editScan(scanId: string, patch: Partial<ScannedMaterial>) {
-    const targetScan = state.scans.find((s) => s.id === scanId);
-    state = {
-      ...state,
-      scans: state.scans.map((s) => (s.id === scanId ? { ...s, ...patch } : s)),
-    };
-    if (targetScan) {
-      this.addAuditLog(`Edited material scan data`, targetScan.userName);
-    }
-    save();
+  async broadcastAnnouncement(title: string, body: string, recipientType: any) {
+    await usersApi.broadcast(title, body, recipientType);
+    await syncWithApi();
   },
 
-  assignPickupDriver(pickupId: string, driverName: string) {
-    state = {
-      ...state,
-      pickups: state.pickups.map((p) => (p.id === pickupId ? { ...p, preferredCenter: driverName, status: "Pickup Scheduled" as const } : p)),
-    };
-    const targetPickup = state.pickups.find((p) => p.id === pickupId);
-    this.addAuditLog(`Assigned collector (${driverName}) to pickup`, targetPickup?.userName);
-    save();
+  async addAuditLog(_action: string, _affectedUser?: string, _affectedOrg?: string) {
+    await syncWithApi();
   },
 
-  broadcastAnnouncement(title: string, body: string, recipientType: "all" | "institutions") {
-    const targets = state.users.filter((u) => {
-      if (recipientType === "institutions") return u.accountType === "Institutional";
-      return u.role === "User";
-    });
-
-    const newNotifs = targets.map((u) => ({
-      id: crypto.randomUUID(),
-      userId: u.id,
-      type: "system" as const,
-      title,
-      body,
-      time: "Just now",
-      unread: true,
-    }));
-
-    state = {
-      ...state,
-      notifications: [...newNotifs, ...state.notifications],
-    };
-    this.addAuditLog(`Broadcasted Announcement: ${title} (${recipientType})`);
-    save();
+  async createPost(text: string, sector?: string, mediaUrl?: string, mediaType?: any, visibility?: any) {
+    await communityApi.createPost({ text, sector, mediaUrl, mediaType, visibility });
+    await syncWithApi();
   },
 
-  addAuditLog(action: string, affectedUser?: string, affectedOrg?: string) {
-    const now = new Date();
-    const newLog: AuditLog = {
-      id: `audit-${now.getTime()}-${Math.random().toString(36).slice(2, 7)}`,
-      date: now.toISOString().split("T")[0],
-      time: now.toTimeString().split(" ")[0],
-      adminName: state.user?.fullName || "System Administrator",
-      action,
-      affectedUser,
-      affectedOrg,
-      ipAddress: "192.168.1.15",
-      deviceInfo: "Chrome 126 / Windows 11",
-    };
-    state = {
-      ...state,
-      auditLogs: [newLog, ...state.auditLogs],
-    };
+  async likePost(postId: string) {
+    await communityApi.likePost(postId);
+    await syncWithApi();
   },
 
-  createPost(text: string, sector?: string, mediaUrl?: string, mediaType?: "image" | "video", visibility: CommunityPost["visibility"] = "Public") {
-    if (!state.user) return;
-    const isInst = state.user.accountType === "Institutional";
-    const badges = isInst 
-      ? ["🏢 Institutional Partner", "🏆 Sustainability Ambassador"]
-      : ["🌱 Green Starter"];
-
-    const newPost: CommunityPost = {
-      id: `post-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      userId: state.user.id,
-      userName: state.user.fullName,
-      userAvatar: state.user.avatar,
-      userRole: state.user.role,
-      userBadges: badges,
-      timestamp: new Date().toISOString(),
-      sector,
-      text,
-      mediaUrl,
-      mediaType,
-      likes: [],
-      helpful: [],
-      niceWork: [],
-      comments: [],
-      reported: false,
-      reportsCount: 0,
-      visibility
-    };
-
-    // Add points for posting
-    const updatedUser = { ...state.user, points: state.user.points + 10 };
-
-    state = {
-      ...state,
-      posts: [newPost, ...state.posts],
-      user: updatedUser,
-      users: state.users.map((u) => (u.id === updatedUser.id ? { ...u, points: updatedUser.points } : u))
-    };
-    this.addAuditLog("Created community post");
-    save();
+  async reactToPost(postId: string, reactionType: any) {
+    await communityApi.reactToPost(postId, reactionType);
+    await syncWithApi();
   },
 
-  likePost(postId: string) {
-    if (!state.user) return;
-    const userId = state.user.id;
-    state = {
-      ...state,
-      posts: state.posts.map((p) => {
-        if (p.id !== postId) return p;
-        const liked = p.likes.includes(userId);
-        return {
-          ...p,
-          likes: liked ? p.likes.filter((id) => id !== userId) : [...p.likes, userId]
-        };
-      })
-    };
-    save();
+  async addComment(postId: string, text: string) {
+    await communityApi.addComment(postId, text);
+    await syncWithApi();
   },
 
-  reactToPost(postId: string, reactionType: "helpful" | "niceWork") {
-    if (!state.user) return;
-    const userId = state.user.id;
-    state = {
-      ...state,
-      posts: state.posts.map((p) => {
-        if (p.id !== postId) return p;
-        const arr = reactionType === "helpful" ? p.helpful : p.niceWork;
-        const active = arr.includes(userId);
-        const updated = active ? arr.filter((id) => id !== userId) : [...arr, userId];
-        return {
-          ...p,
-          [reactionType]: updated
-        };
-      })
-    };
-    save();
+  async reportPost(postId: string) {
+    await communityApi.reportPost(postId);
+    await syncWithApi();
   },
 
-  addComment(postId: string, text: string) {
-    if (!state.user) return;
-    const newComment: CommunityComment = {
-      id: `comment-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      postId,
-      userId: state.user.id,
-      userName: state.user.fullName,
-      userAvatar: state.user.avatar,
-      userRole: state.user.role,
-      text,
-      timestamp: new Date().toISOString()
-    };
-
-    state = {
-      ...state,
-      posts: state.posts.map((p) => {
-        if (p.id !== postId) return p;
-        return {
-          ...p,
-          comments: [...p.comments, newComment]
-        };
-      })
-    };
-    save();
+  async resolvePostReport(postId: string, dismiss: boolean) {
+    await communityApi.resolveReport(postId, dismiss);
+    await syncWithApi();
   },
 
-  reportPost(postId: string) {
-    state = {
-      ...state,
-      posts: state.posts.map((p) => {
-        if (p.id !== postId) return p;
-        return {
-          ...p,
-          reported: true,
-          reportsCount: p.reportsCount + 1
-        };
-      })
-    };
-    save();
+  async joinEvent(eventId: string) {
+    await communityApi.joinEvent(eventId);
+    await syncWithApi();
   },
 
-  resolvePostReport(postId: string, dismiss: boolean) {
-    if (dismiss) {
-      state = {
-        ...state,
-        posts: state.posts.map((p) => (p.id === postId ? { ...p, reported: false, reportsCount: 0 } : p))
-      };
-    } else {
-      state = {
-        ...state,
-        posts: state.posts.filter((p) => p.id !== postId)
-      };
-    }
-    save();
+  async leaveEvent(eventId: string) {
+    await communityApi.leaveEvent(eventId);
+    await syncWithApi();
   },
 
-  joinEvent(eventId: string) {
-    if (!state.user) return;
-    const userId = state.user.id;
-    state = {
-      ...state,
-      events: state.events.map((e) => {
-        if (e.id !== eventId) return e;
-        if (e.volunteers.includes(userId)) return e;
-        return {
-          ...e,
-          volunteers: [...e.volunteers, userId]
-        };
-      })
-    };
-    save();
+  async createMarketplaceListing(title: string, description: string, price: number, points: number, sector: string, quantity: number, imageUrl?: string) {
+    await marketplaceApi.create({ title, description, price, points, sector, quantity, imageUrl });
+    await syncWithApi();
   },
 
-  leaveEvent(eventId: string) {
-    if (!state.user) return;
-    const userId = state.user.id;
-    state = {
-      ...state,
-      events: state.events.map((e) => {
-        if (e.id !== eventId) return e;
-        return {
-          ...e,
-          volunteers: e.volunteers.filter((id) => id !== userId)
-        };
-      })
-    };
-    save();
+  async buyMarketplaceItem(listingId: string) {
+    await marketplaceApi.buy(listingId);
+    await syncWithApi();
   },
 
-  createMarketplaceListing(title: string, description: string, price: number, points: number, sector: string, quantity: number, imageUrl?: string) {
-    if (!state.user) return;
-    const newListing: MarketplaceListing = {
-      id: `list-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      title,
-      description,
-      price,
-      points,
-      sellerId: state.user.id,
-      sellerName: state.user.fullName,
-      sellerAvatar: state.user.avatar,
-      sellerRole: state.user.role,
-      sector,
-      quantity,
-      imageUrl: imageUrl || "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80",
-      dateListed: new Date().toISOString().split("T")[0],
-      status: "Available"
-    };
-
-    state = {
-      ...state,
-      marketplace: [newListing, ...state.marketplace]
-    };
-    this.addAuditLog(`Listed marketplace material: ${title}`);
-    save();
+  async adminResolveReport(postId: string, approve: boolean) {
+    await communityApi.resolveReport(postId, approve);
+    await syncWithApi();
   },
 
-  buyMarketplaceItem(listingId: string) {
-    if (!state.user) return;
-    const buyer = state.user;
-    const item = state.marketplace.find((l) => l.id === listingId);
-    if (!item || item.status === "Sold") return;
-
-    if (buyer.points < item.points) {
-      throw new Error(`Insufficient eco points. You need ${item.points} pts but have ${buyer.points} pts.`);
-    }
-
-    // Deduct points from buyer
-    const updatedBuyer = { ...buyer, points: buyer.points - item.points };
-
-    state = {
-      ...state,
-      marketplace: state.marketplace.map((l) => (l.id === listingId ? { ...l, status: "Sold" as const } : l)),
-      user: updatedBuyer,
-      users: state.users.map((u) => {
-        if (u.id === updatedBuyer.id) return { ...u, points: updatedBuyer.points };
-        // Credit the seller points if they are in the user pool
-        if (u.id === item.sellerId) return { ...u, points: u.points + item.points };
-        return u;
-      })
-    };
-
-    this.addAuditLog(`Claimed marketplace item: ${item.title}`);
-    save();
+  async adminDeletePost(postId: string) {
+    await communityApi.deletePost(postId);
+    await syncWithApi();
   },
 
-  adminResolveReport(postId: string, approve: boolean) {
-    if (approve) {
-      // Keep post, dismiss report
-      state = {
-        ...state,
-        posts: state.posts.map((p) => (p.id === postId ? { ...p, reported: false, reportsCount: 0 } : p))
-      };
-      this.addAuditLog(`Dismissed community post reports for post ${postId}`);
-    } else {
-      // Reject and delete post
-      state = {
-        ...state,
-        posts: state.posts.filter((p) => p.id !== postId)
-      };
-      this.addAuditLog(`Moderator deleted reported post ${postId}`);
-    }
-    save();
+  async adminCreateChallenge(title: string, description: string, points: number, co2: number, targetQuantity: number, sector: string, daysRemaining: number) {
+    await communityApi.createChallenge({ title, description, points, co2, targetQuantity, sector, daysRemaining });
+    await syncWithApi();
   },
 
-  adminDeletePost(postId: string) {
-    state = {
-      ...state,
-      posts: state.posts.filter((p) => p.id !== postId)
-    };
-    this.addAuditLog(`Deleted community post ${postId}`);
-    save();
-  },
-
-  adminCreateChallenge(title: string, description: string, points: number, co2: number, targetQuantity: number, sector: string, daysRemaining: number) {
-    const newChallenge: CommunityChallenge = {
-      id: `challenge-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      title,
-      description,
-      points,
-      co2,
-      daysRemaining,
-      targetQuantity,
-      progress: 0,
-      completed: false,
-      sector
-    };
-    state = {
-      ...state,
-      challenges: [newChallenge, ...state.challenges]
-    };
-    this.addAuditLog(`Created challenge: ${title}`);
-    save();
-  },
-
-  adminCreateEvent(title: string, description: string, date: string, time: string, location: string, host: string, imageUrl?: string) {
-    const newEvent: CommunityEvent = {
-      id: `event-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      title,
-      description,
-      date,
-      time,
-      location,
-      host,
-      volunteers: [],
-      maxVolunteers: 100,
-      imageUrl: imageUrl || "https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&q=80"
-    };
-    state = {
-      ...state,
-      events: [newEvent, ...state.events]
-    };
-    this.addAuditLog(`Created event: ${title}`);
-    save();
+  async adminCreateEvent(title: string, description: string, date: string, time: string, location: string, host: string, imageUrl?: string) {
+    await communityApi.createEvent({ title, description, date, time, location, host, imageUrl });
+    await syncWithApi();
   },
 };
 
-/**
- * useUser — reads from the API-authenticated user in localStorage first.
- * Falls back to the in-memory mock store during migration.
- */
+// ─── Custom React Hooks ─────────────────────────────────────────────────────
+
 export function useUser(): (User & { id: string }) | null {
   const [apiUser, setApiUser] = useState<(User & { id: string }) | null>(() => {
     try {
       const raw = localStorage.getItem("eco-recovery-hub-user");
       if (raw) {
         const parsed = JSON.parse(raw);
-        // MongoDB uses _id; normalise to id
         return { ...parsed, id: parsed._id || parsed.id };
       }
     } catch {}
     return null;
   });
+
+  const storeUser = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot).user;
 
   useEffect(() => {
     const handleStorage = () => {
@@ -1106,8 +680,12 @@ export function useUser(): (User & { id: string }) | null {
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  // Prefer API user; fall back to mock store user
-  const storeUser = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot).user;
+  useEffect(() => {
+    if (getToken() && !storeUser) {
+      syncWithApi();
+    }
+  }, [storeUser]);
+
   return apiUser ?? storeUser;
 }
 
@@ -1117,12 +695,9 @@ export function useHydrated() {
   return h;
 }
 
-/**
- * signOut — clears both the JWT token and the in-memory store.
- * Call this from any logout button.
- */
 export function signOut() {
-  localStorage.removeItem("eco-recovery-hub-token");
+  clearToken();
   localStorage.removeItem("eco-recovery-hub-user");
-  store.signOut();
+  state = getInitialState();
+  save();
 }

@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import { errorHandler } from "./middleware/errorHandler";
+import { seedDatabase } from "./utils/seed";
+
 
 // Route imports
 import authRoutes from "./routes/auth";
@@ -75,6 +77,7 @@ async function start() {
   try {
     await mongoose.connect(mongoUri);
     console.log("✅  MongoDB connected");
+    await seedDatabase();
   } catch (err) {
     console.error("❌  MongoDB connection failed:", err);
     process.exit(1);

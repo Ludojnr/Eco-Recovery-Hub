@@ -1,6 +1,7 @@
 {
   "name": "eco-recovery-hub-monorepo",
   "private": true,
+  "workspaces": ["Client", "Server"],
   "version": "1.0.0",
   "description": "Eco-Recovery Hub Monorepo - Client & Server",
   "scripts": {
