@@ -24,11 +24,12 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { token, user } = await authApi.login(email, password);
-      setToken(token);
-      localStorage.setItem("eco-recovery-hub-user", JSON.stringify(user));
-      toast.success(`Welcome back, ${user.fullName}!`);
-      if (user.role === "Admin") {
+      await store.signIn(email, password);
+      const snapUser = store.getSnapshot().user;
+      const rawUser = localStorage.getItem("eco-recovery-hub-user");
+      const user = snapUser || (rawUser ? JSON.parse(rawUser) : null);
+      toast.success(`Welcome back${user?.fullName ? `, ${user.fullName}` : ""}!`);
+      if (user?.role === "Admin") {
         navigate({ to: "/admin-dashboard" });
       } else {
         navigate({ to: "/dashboard" });

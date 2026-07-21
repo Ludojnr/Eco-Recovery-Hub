@@ -21,7 +21,8 @@ export const Route = createFileRoute("/pickups")({
 
 function Pickups() {
   const snap = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-  const user = snap.user!;
+  const currentUser = useUser();
+  const user = snap.user ?? currentUser;
   
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -29,9 +30,11 @@ function Pickups() {
     quantity: "1",
     preferredDate: "",
     preferredCenter: centers[0]?.name || "GreenHub Accra",
-    address: user.preferredPickupAddresses[0] || "",
+    address: user?.preferredPickupAddresses?.[0] || "",
     notes: "",
   });
+
+  if (!user) return null;
 
   // Filter pickups matching current user
   const userPickups = snap.pickups.filter((p: any) => p.userId === user.id);

@@ -236,6 +236,7 @@ function convertUser(u: ApiUser): User {
   return {
     ...u,
     id: u._id || (u as any).id,
+    preferredPickupAddresses: u.preferredPickupAddresses || [],
     memberSince: u.memberSince ? new Date(u.memberSince).toISOString() : new Date().toISOString(),
   };
 }

@@ -47,7 +47,10 @@ export const Route = createFileRoute("/community")({
 
 function CommunityPage() {
   const snap = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-  const user = snap.user!;
+  const currentUser = useUser();
+  const user = snap.user ?? currentUser;
+
+  if (!user) return null;
   
   // Tab/filter state for Left Sidebar
   const [feedFilter, setFeedFilter] = useState<"all" | "my" | "saved">("all");

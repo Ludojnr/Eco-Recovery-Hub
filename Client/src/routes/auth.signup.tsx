@@ -70,11 +70,16 @@ function SignUp() {
               orgPhone: form.orgPhone,
             };
 
-      const { token, user } = await authApi.signup(payload);
-      setToken(token);
-      localStorage.setItem("eco-recovery-hub-user", JSON.stringify(user));
+      await store.signUp(payload);
+      const snapUser = store.getSnapshot().user;
+      const rawUser = localStorage.getItem("eco-recovery-hub-user");
+      const user = snapUser || (rawUser ? JSON.parse(rawUser) : null);
       toast.success("Account created — welcome to Eco-Recovery-Hub!");
-      navigate({ to: "/dashboard" });
+      if (user?.role === "Admin") {
+        navigate({ to: "/admin-dashboard" });
+      } else {
+        navigate({ to: "/dashboard" });
+      }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Signup failed");
     } finally {

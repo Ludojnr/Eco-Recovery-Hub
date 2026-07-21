@@ -64,7 +64,10 @@ function computeBadges(user: any, scans: any[], posts: any[]) {
 
 function Rewards() {
   const snap = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-  const user = snap.user!;
+  const currentUser = useUser();
+  const user = snap.user ?? currentUser;
+
+  if (!user) return null;
 
   // ── Live leaderboard from real users ─────────────────────────────────────
   const sortedUsers = [...snap.users].sort((a, b) => b.points - a.points);

@@ -31,7 +31,10 @@ export const Route = createFileRoute("/messages")({
 
 function MessagesHandler() {
   const snap = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-  const user = snap.user!;
+  const currentUser = useUser();
+  const user = snap.user ?? currentUser;
+
+  if (!user) return null;
 
   if (user.role === "Admin") {
     return <AdminChatDashboard snap={snap} user={user} />;

@@ -98,7 +98,10 @@ function AdminDashboardLayout() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
   const snap = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-  const user = snap.user!;
+  const currentUser = useUser();
+  const user = snap.user ?? currentUser;
+
+  if (!user) return null;
 
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [globalSearch, setGlobalSearch] = useState("");

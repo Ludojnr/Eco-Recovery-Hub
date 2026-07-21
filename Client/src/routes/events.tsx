@@ -31,7 +31,10 @@ export const Route = createFileRoute("/events")({
 
 function EventsPage() {
   const snap = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-  const user = snap.user!;
+  const currentUser = useUser();
+  const user = snap.user ?? currentUser;
+
+  if (!user) return null;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMode, setFilterMode] = useState<"all" | "joined">("all");

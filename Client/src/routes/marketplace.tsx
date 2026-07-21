@@ -35,7 +35,10 @@ export const Route = createFileRoute("/marketplace")({
 
 function MarketplacePage() {
   const snap = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-  const user = snap.user!;
+  const currentUser = useUser();
+  const user = snap.user ?? currentUser;
+
+  if (!user) return null;
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");

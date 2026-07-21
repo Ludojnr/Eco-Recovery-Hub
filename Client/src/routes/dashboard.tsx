@@ -40,13 +40,24 @@ export const Route = createFileRoute("/dashboard")({
 function DashboardHandler() {
   const navigate = useNavigate();
   const snap = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
-  const user = snap.user!;
+  const currentUser = useUser();
+  const user = snap.user ?? currentUser;
 
   useEffect(() => {
-    if (user.role === "Admin") {
+    if (user?.role === "Admin") {
       navigate({ to: "/admin-dashboard", replace: true });
     }
   }, [user, navigate]);
+
+  if (!user) {
+    return (
+      <PageContainer>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading account profile...</p>
+        </div>
+      </PageContainer>
+    );
+  }
 
   if (user.role === "Admin") {
     return (
