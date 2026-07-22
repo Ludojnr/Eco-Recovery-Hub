@@ -121,11 +121,11 @@ function SignUp() {
 
         {accountType === "Individual" ? (
           <>
-            <Field label="Full Name"><Input required value={form.fullName} onChange={set("fullName")} placeholder="Afia Mensah" /></Field>
+            <Field label="Full Name"><Input required value={form.fullName} onChange={set("fullName")} placeholder="Full Name" /></Field>
             <Field label="Email Address"><Input type="email" required value={form.email} onChange={set("email")} placeholder="you@example.com" /></Field>
             <Field label="Phone Number"><Input type="tel" required value={form.phone} onChange={set("phone")} placeholder="+233 20 000 0000" /></Field>
-            <Field label="Affiliated Institution (Optional)"><Input value={form.institution} onChange={set("institution")} placeholder="e.g. University of Ghana" /></Field>
-            <Field label="Location"><Input required value={form.location} onChange={set("location")} placeholder="e.g. Accra" /></Field>
+            <Field label="Affiliated Institution (Optional)"><Input value={form.institution} onChange={set("institution")} placeholder="e.g. Koforidua Technical University" /></Field>
+            <Field label="Location"><Input required value={form.location} onChange={set("location")} placeholder="e.g.Koforidua" /></Field>
           </>
         ) : (
           <>
