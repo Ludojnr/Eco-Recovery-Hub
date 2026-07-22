@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { authApi, setToken } from "@/lib/api";
+import { store } from "@/lib/mock-store";
 import { toast } from "sonner";
 import { AuthLayout, Field, SocialDivider } from "./auth.login";
 
@@ -23,7 +23,7 @@ function SignUp() {
     location: "",
     password: "",
     confirm: "",
-    
+
     // Institutional fields
     orgName: "",
     orgType: "University",
@@ -40,34 +40,34 @@ function SignUp() {
     e.preventDefault();
     if (form.password.length < 6) return toast.error("Password must be at least 6 characters.");
     if (form.password !== form.confirm) return toast.error("Passwords do not match.");
-    
+
     setLoading(true);
     try {
       const payload =
         accountType === "Individual"
           ? {
-              fullName: form.fullName,
-              email: form.email,
-              phone: form.phone,
-              institution: form.institution || "None",
-              location: form.location,
+              fullName: form.fullName.trim(),
+              email: form.email.trim().toLowerCase(),
+              phone: form.phone.trim(),
+              institution: form.institution.trim() || "None",
+              location: form.location.trim(),
               password: form.password,
               accountType: "Individual" as const,
             }
           : {
-              fullName: form.contactPerson,
-              email: form.orgEmail,
-              phone: form.orgPhone,
-              institution: form.orgName,
-              location: form.orgLocation,
+              fullName: form.contactPerson.trim(),
+              email: form.orgEmail.trim().toLowerCase(),
+              phone: form.orgPhone.trim(),
+              institution: form.orgName.trim(),
+              location: form.orgLocation.trim(),
               password: form.password,
               accountType: "Institutional" as const,
-              orgName: form.orgName,
+              orgName: form.orgName.trim(),
               orgType: form.orgType,
-              orgLocation: form.orgLocation,
-              contactPerson: form.contactPerson,
-              orgEmail: form.orgEmail,
-              orgPhone: form.orgPhone,
+              orgLocation: form.orgLocation.trim(),
+              contactPerson: form.contactPerson.trim(),
+              orgEmail: form.orgEmail.trim().toLowerCase(),
+              orgPhone: form.orgPhone.trim(),
             };
 
       await store.signUp(payload);
@@ -130,7 +130,7 @@ function SignUp() {
         ) : (
           <>
             <Field label="Organization Name"><Input required value={form.orgName} onChange={set("orgName")} placeholder="e.g. Koforidua Technical University" /></Field>
-            
+
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Organization Type</label>
               <select

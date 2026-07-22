@@ -32,7 +32,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { notifications, dashboardStats } from "@/lib/mock-data";
 import { UserAvatar } from "@/routes/settings";
 
 const navLinks = [
@@ -227,7 +226,7 @@ export function Navbar() {
                     </div>
                   </div>
                   <div className="mt-2 grid gap-1 text-[11px]">
-                    <div className="flex items-center justify-between"><span>Points</span><span>{dashboardStats.points} pts</span></div>
+                    <div className="flex items-center justify-between"><span>Points</span><span>{user.points.toLocaleString()} pts</span></div>
                     <div className="flex items-center justify-between"><span>KYC</span><span className={kycBadgeClass}>{kycStatus}</span></div>
                   </div>
                 </div>

@@ -47,8 +47,8 @@ function TradeIn() {
 
           <div className="rounded-xl bg-eco-gradient p-6 text-eco-foreground text-center glow-eco">
             <div className="text-sm opacity-80">Estimated trade-in value</div>
-            <div className="font-display text-5xl font-bold mt-1">₦{estimate.toLocaleString()}</div>
-            <div className="mt-2 text-xs opacity-80">Range: ₦{range.low.toLocaleString()} – ₦{range.high.toLocaleString()}</div>
+            <div className="font-display text-5xl font-bold mt-1">GH₵{estimate.toLocaleString()}</div>
+            <div className="mt-2 text-xs opacity-80">Range: GH₵{range.low.toLocaleString()} – GH₵{range.high.toLocaleString()}</div>
           </div>
 
           <p className="text-xs text-muted-foreground text-center">Estimates only. Final value confirmed after inspection at a certified center.</p>

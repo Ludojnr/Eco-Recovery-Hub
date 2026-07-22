@@ -456,7 +456,11 @@ export const store = {
     const { token, user } = await authApi.signup(input);
     setToken(token);
     localStorage.setItem("eco-recovery-hub-user", JSON.stringify(user));
-    await syncWithApi();
+    // Hydrate user immediately so navigation works even if full sync is slow
+    state = { ...state, user: convertUser(user) };
+    save();
+    // Best-effort full sync; auth already succeeded
+    await syncWithApi().catch((err) => console.error("Post-signup sync error:", err));
   },
 
   async signIn(email: string, password?: string) {
@@ -464,10 +468,14 @@ export const store = {
       await syncWithApi();
       return;
     }
-    const { token, user } = await authApi.login(email, password);
+    const { token, user } = await authApi.login(email.trim().toLowerCase(), password);
     setToken(token);
     localStorage.setItem("eco-recovery-hub-user", JSON.stringify(user));
-    await syncWithApi();
+    // Hydrate user immediately so admin/user routing works without waiting on full sync
+    state = { ...state, user: convertUser(user) };
+    save();
+    // Best-effort full sync; auth already succeeded
+    await syncWithApi().catch((err) => console.error("Post-login sync error:", err));
   },
 
   async signOut() {

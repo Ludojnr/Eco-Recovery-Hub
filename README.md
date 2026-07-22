@@ -46,7 +46,7 @@ npm run dev           # starts both client + server concurrently
 4. Add **Environment Variables** in Vercel dashboard:
    | Key | Value |
    |-----|-------|
-   | `VITE_API_URL` | `https://eco-recovery-hub-server.onrender.com` |
+   | `VITE_API_URL` | `https://eco-recovery-hub.onrender.com` |
 
 ---
 
@@ -79,6 +79,18 @@ JWT_SECRET=...
 FRONTEND_URL=http://localhost:5173
 NODE_ENV=development
 ```
+
+---
+
+## 👤 Default Accounts (seeded on server start)
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@ecorecovery.org` | `password123` |
+| Institution (KTU) | `ktu@ecorecovery.org` | `password123` |
+| Institution (GreenCorp) | `greencorp@ecorecovery.org` | `password123` |
+
+If admin login fails after a DB reset, redeploy/restart the Render service so `seedDatabase()` re-creates the admin user.
 
 ---
 

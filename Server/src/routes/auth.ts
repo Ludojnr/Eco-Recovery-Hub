@@ -9,7 +9,7 @@ const router = Router();
 
 const signupSchema = z.object({
   fullName: z.string().min(2),
-  email: z.string().email(),
+  email: z.string().email().transform((v) => v.trim().toLowerCase()),
   password: z.string().min(6),
   phone: z.string().optional().default(""),
   institution: z.string().optional().default(""),
@@ -19,19 +19,28 @@ const signupSchema = z.object({
   orgType: z.string().optional(),
   orgLocation: z.string().optional(),
   contactPerson: z.string().optional(),
-  orgEmail: z.string().email().optional(),
+  // Empty string should not fail as invalid email when field is unused
+  orgEmail: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.trim() ? v.trim().toLowerCase() : undefined))
+    .pipe(z.string().email().optional()),
   orgPhone: z.string().optional(),
 });
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().transform((v) => v.trim().toLowerCase()),
   password: z.string(),
 });
 
 function signToken(user: { _id: unknown; role: string; email: string }): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET is not configured on the server");
+  }
   return jwt.sign(
     { id: user._id, role: user.role, email: user.email },
-    process.env.JWT_SECRET as string,
+    secret,
     { expiresIn: "7d" }
   );
 }
@@ -48,7 +57,9 @@ router.post("/signup", async (req: Request, res: Response): Promise<void> => {
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 12);
-    const isAdminEmail = data.email.toLowerCase().startsWith("admin") || data.email.toLowerCase().endsWith("@ecorecovery.org");
+    // Only dedicated admin emails get Admin role (not all @ecorecovery.org accounts)
+    const isAdminEmail =
+      data.email === "admin@ecorecovery.org" || data.email.startsWith("admin@");
     const user = await User.create({
       ...data,
       password: hashedPassword,

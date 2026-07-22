@@ -332,8 +332,8 @@ function MapView() {
                     </div>
                   </div>
                   <div className="text-xs text-right shrink-0">
-                    <div className="font-semibold tabular-nums">
-                      {c.realDist != null ? fmtDist(c.realDist) : c.distance}
+                    <div className="font-semibold tabular-nums text-muted-foreground">
+                      {c.realDist != null ? fmtDist(c.realDist) : "Ghana Center"}
                     </div>
                     <Button
                       id={`go-btn-${c.id}`}

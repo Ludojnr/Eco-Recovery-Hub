@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { authApi, setToken } from "@/lib/api";
+import { store } from "@/lib/mock-store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/login")({
@@ -24,7 +24,7 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await store.signIn(email, password);
+      await store.signIn(email.trim(), password);
       const snapUser = store.getSnapshot().user;
       const rawUser = localStorage.getItem("eco-recovery-hub-user");
       const user = snapUser || (rawUser ? JSON.parse(rawUser) : null);
@@ -40,7 +40,6 @@ function Login() {
       setLoading(false);
     }
   };
-
 
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to continue your recycling journey.">

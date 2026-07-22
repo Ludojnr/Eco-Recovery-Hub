@@ -8,7 +8,11 @@
 // In production (Vercel), VITE_API_URL is "" so all /api/* calls are relative
 // and forwarded to Render by vercel.json rewrites.
 // In local dev, VITE_API_URL="http://localhost:5000" from .env.
-const BASE_URL = (import.meta.env.VITE_API_URL as string) ?? "";
+// Fallback: direct Render URL if proxy is unavailable.
+const configuredBase = (import.meta.env.VITE_API_URL as string | undefined)?.trim() ?? "";
+const BASE_URL =
+  configuredBase ||
+  (import.meta.env.PROD ? "https://eco-recovery-hub.onrender.com" : "");
 const TOKEN_KEY = "eco-recovery-hub-token";
 const USER_KEY = "eco-recovery-hub-user";
 
@@ -41,11 +45,21 @@ async function request<T>(
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  const url = `${BASE_URL}${path}`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch (fetchErr) {
+    const message =
+      fetchErr instanceof Error ? fetchErr.message : "Network request failed";
+    throw new Error(
+      `Cannot reach API (${url}). ${message}. If the backend is on free Render, wait ~30s for cold start and try again.`
+    );
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: "Request failed" }));

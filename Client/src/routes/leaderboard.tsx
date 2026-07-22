@@ -369,7 +369,9 @@ function LeaderboardRoute() {
                     </div>
                     <span className="text-sm font-medium text-gray-700">Total Points</span>
                   </div>
-                  <span className="font-bold text-gray-900">1.2M+</span>
+                  <span className="font-bold text-gray-900">
+                    {users.reduce((sum, u) => sum + (u.points || 0), 0).toLocaleString()} pts
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
@@ -379,7 +381,7 @@ function LeaderboardRoute() {
                     </div>
                     <span className="text-sm font-medium text-gray-700">Items Scanned</span>
                   </div>
-                  <span className="font-bold text-gray-900">45.5k</span>
+                  <span className="font-bold text-gray-900">{storeState.scans.length.toLocaleString()}</span>
                 </div>
 
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
@@ -389,29 +391,50 @@ function LeaderboardRoute() {
                     </div>
                     <span className="text-sm font-medium text-gray-700">Active Members</span>
                   </div>
-                  <span className="font-bold text-gray-900">8,902</span>
+                  <span className="font-bold text-gray-900">{users.length.toLocaleString()}</span>
                 </div>
               </div>
             </div>
 
-            {/* Achievements Snippet */}
-            <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-2xl p-6 text-white shadow-sm">
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <Medal className="w-4 h-4 text-yellow-400" />
-                Monthly Challenge
-              </h3>
-              <p className="text-gray-300 text-sm mb-4">
-                "Zero Waste September" is live. Top 10 recyclers get a premium badge and 500 bonus points!
-              </p>
-              
-              <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                <div className="bg-yellow-400 h-2 rounded-full" style={{ width: '65%' }}></div>
+            {/* Active Challenge (if created by admin) */}
+            {storeState.challenges.length > 0 && (
+              <div className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-2xl p-6 text-white shadow-sm">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <Medal className="w-4 h-4 text-yellow-400" />
+                  {storeState.challenges[0].title}
+                </h3>
+                <p className="text-gray-300 text-sm mb-4">
+                  {storeState.challenges[0].description}
+                </p>
+                
+                <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                  <div
+                    className="bg-yellow-400 h-2 rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.round(
+                          ((storeState.challenges[0].progress || 0) /
+                            Math.max(1, storeState.challenges[0].targetQuantity || 1)) *
+                            100
+                        )
+                      )}%`,
+                    }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>{storeState.challenges[0].daysRemaining} days left</span>
+                  <span>
+                    {Math.round(
+                      ((storeState.challenges[0].progress || 0) /
+                        Math.max(1, storeState.challenges[0].targetQuantity || 1)) *
+                        100
+                    )}
+                    % Goal Reached
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between text-xs text-gray-400">
-                <span>12 days left</span>
-                <span>65% Goal Reached</span>
-              </div>
-            </div>
+            )}
 
           </div>
         </div>
